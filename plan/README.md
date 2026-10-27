@@ -20,14 +20,16 @@
 
 ## 优先级总览
 
-| 优先级 | 主题 | 详见 |
+> Phase 0–2 主路径多数已在 `master` 落地；下表保留历史优先级，**以 [bugs.md](./bugs.md) 的 Status 为准**。
+
+| 优先级 | 主题 | 状态（概览） |
 | --- | --- | --- |
-| P0 | AI 解析失败清空画布；API Key 进前端包 / localStorage | bugs.md critical |
-| P0 | 多画布删除/重命名边界导致丢数据或写坏 localStorage | bugs.md critical/high |
-| P1 | AI 空 prompt 未 return、无覆盖确认；Mermaid 固定 render id | bugs.md high |
-| P1 | 动画 loop 泄漏 / Modal 硬编码文案与暗色不兼容 | bugs + ux |
-| P2 | 字体资源与 FONT_FAMILY 不一致；antd 与 Excalidraw 视觉分裂 | ux-and-style |
-| P3 | 快捷键为空、a11y、CSS 债务、工具链（yarn/tsc） | roadmap 后段 |
+| P0 | AI 空结果清空画布；密钥进 bundle/localStorage | 代码侧 fixed；`.env*.local` 运维残留另清 |
+| P0 | 多画布删除/重命名边界 | fixed |
+| P1 | AI 确认/插入/新建、Mermaid、动画泄漏、暗色 Modal | fixed |
+| P1 | 折线中点、插入 ID 重映射、配额回滚、请求体/上传治理 | fixed |
+| P2 | 字体选择 UI、完整 BFF、CSP、antd 表面积 | 部分 open |
+| P3 | 空快捷键、a11y、工具链 tsc | open |
 
 ## 分析边界 / 阻塞
 

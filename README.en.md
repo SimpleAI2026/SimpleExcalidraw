@@ -1,152 +1,103 @@
 ![中文文档](./README.md)  
 ![English Document](./README.en.md)
 
+SimpleExcalidraw is a customized fork of [Excalidraw](https://github.com/excalidraw/excalidraw): Chinese handwriting fonts, multi-canvas, AI generation, Mermaid conversion, and draw replay animation.
+
 ## Features
 
-- [x] Chinese handwriting
-- [x] Multi-canvas support
+- [x] Chinese handwriting (Zhushiti fallback stack)
+- [x] Multi-canvas (in-app switch without full reload; delete/rename guards)
 - [x] Field adapter scripts for multi-templates
 - [x] More color choices
-- [ ] Additional border styles
-- [ ] Font selection
-- [x] Mobile experience optimization (details TBD)
-- [x] AI-generated content
-- [x] Fix PDF parsing issue
-- [x] Animation display effect
+- [ ] Extra border styles
+- [ ] Font picker UI (fonts/fallbacks are wired; picker not built)
+- [x] Mobile UX polish (full-width AI modal, toolbar overflow, etc.)
+- [x] AI generation (replace / insert / new canvas; cancellable; PDF/md/txt/csv into prompt)
+- [x] Mermaid → Excalidraw (input sanitization, unique render id)
+- [x] Drag segment midpoints on a selected polyline to keep bending
+- [x] Draw replay animation (pause / cancel)
+- [x] Readable custom modals in dark theme
+
+See [`plan/`](./plan/README.md) for bugs and roadmap detail.
 
 ## Screenshots
 
-![](./dev-docs/images/ScreenShot1.png) ![](./dev-docs/images/ScreenShot2.png)
+![](./dev-docs/images/ScreenShot1.png)  
+![](./dev-docs/images/ScreenShot2.png)
 
-## Environment Variables
+## AI assistant
 
+1. Open the AI assistant and set **API URL** and **model**; paste the **secret** in the panel (stored in tab `sessionStorage` only; cleared when the tab closes).
+2. Results can **replace / insert into / create a new canvas**; empty results never wipe the scene.
+3. You may upload `.md` / `.txt` / `.csv` / `.pdf` (≤ 2MB; prompt capped ~9000 chars with a truncation warning).
+4. For production, prefer your own BFF—never bake secrets into frontend env. See [`api/README.md`](./api/README.md).
+
+## Environment variables (optional defaults)
+
+```bash
+# Optional defaults only (bundled into the client — never put secrets here)
+REACT_APP_AI_API=https://api.openai.com/v1/chat/completions
+REACT_APP_AI_MODEL=gpt-4o-mini
 ```
-REACT_APP_AI_API= // Your AI API endpoint, e.g., https://api.openai.com/v1/chat/completions
-REACT_APP_AI_SECRET= // Do NOT put secrets in frontend env; enter the key in the app UI, or proxy via your own backend
-REACT_APP_AI_MODEL= // Your AI model name, e.g., gpt-3.5-turbo
-```
 
-> **Security**: `REACT_APP_AI_SECRET` is inlined into the browser bundle. **Do not** ship real secrets via `REACT_APP_*`. Have users enter the key in the AI assistant panel, or proxy through your backend. `REACT_APP_AI_API` / `REACT_APP_AI_MODEL` may be used as optional defaults.
+> **Do not** set `REACT_APP_AI_SECRET`: CRA inlines it into browser JS. Enter the key in the AI panel, or inject it via a backend proxy.
 
-## Live Demo
+## Live demo
 
 https://excalidraw-phi-woad.vercel.app/
 
-## Local Installation
-
-These instructions will get you a copy of the project up and running on your local machine for development and testing.
+## Local installation
 
 ### Requirements
 
-- [Node.js](https://nodejs.org/en/)
-- [Yarn](https://yarnpkg.com/getting-started/install) (v1 or v2.4.2+)
+- [Node.js](https://nodejs.org/en/) (`.nvmrc` says 14; for day-to-day work Node ≥ 18 is fine)
+- [Yarn Classic v1](https://yarnpkg.com/getting-started/install) (**not** Yarn Berry / 2+; this repo uses a v1 lockfile — see `.yarnrc`)
 - [Git](https://git-scm.com/downloads)
 
-### Clone the repo
+If `yarn -v` shows 2.x+:
+
+```bash
+npm i -g yarn@1.22.22
+# or: npx yarn@1.22.22
+```
+
+### Clone and start
 
 ```bash
 git clone https://github.com/linkxzhou/SimpleExcalidraw.git
-```
-
-### Install dependencies
-
-```bash
+cd SimpleExcalidraw
 yarn
+yarn start   # same as yarn dev; http://localhost:3000
 ```
-
-### Start the server
-
-```bash
-yarn start
-```
-
-Now you can open [http://localhost:3000](http://localhost:3000) and start coding in your favorite editor.
 
 ### Collaboration
 
-For collaboration, set up the local collab server: https://github.com/excalidraw/excalidraw-room
+For live collab, deploy a collab server: https://github.com/excalidraw/excalidraw-room
 
 ### Commands
 
-#### Install dependencies
-
-```
-yarn
-```
-
-#### Run the project
-
-```
-yarn start
-```
-
-#### Reformat all files with Prettier
-
-```
-yarn fix
-```
-
-#### Run tests
-
-```
-yarn test
-```
-
-#### Update test snapshots
-
-```
-yarn test:update
-```
-
-#### Test for formatting with Prettier
-
-```
-yarn test:code
-```
+| Command | Purpose |
+| --- | --- |
+| `yarn` / `yarn start` | Install / local dev |
+| `yarn build` | Production build |
+| `yarn fix` | Prettier + ESLint autofix |
+| `yarn test` | Run tests |
+| `yarn test:update` | Update snapshots |
+| `yarn test:code` | ESLint only |
 
 ### Docker Compose
-
-You can use docker-compose to work on Excalidraw locally if you don't want to set up a Node.js environment.
 
 ```sh
 docker-compose up --build -d
 ```
 
-## Animation Implementation
+## Animation (brief)
 
-This project implements a whiteboard animation feature based on SVG and Web Animations API (WAAPI), allowing users to replay the drawing process.
+Code lives under `src/animate/`: export the scene to SVG, allocate duration by path length, replay with WAAPI (`stroke-dashoffset`, etc.). Supports play / pause / cancel / loop. Entry: `AnimateApp.tsx` (Modal); core: `animate.ts`.
 
-### Core Architecture
+## Project sources
 
-The animation module is mainly located in the `src/animate` directory and consists of the following core parts:
-
-1.  **`AnimateApp.tsx`**: The entry component for the animation feature, displayed as a Modal. It is responsible for managing global state (such as duration, loop toggle, pause state) and coordinating the `Viewer` and `AnimateConfig` components.
-2.  **`Viewer.tsx`**: Responsible for rendering SVG content and executing animations.
-    - It first calls `exportToSvg` to convert the current whiteboard content into an SVG DOM.
-    - Then it calls `animateSvg` to apply animation effects to the SVG elements.
-3.  **`AnimateConfig.tsx`**: Provides the user control interface, including duration selection, loop toggle, and replay button.
-4.  **`animate.ts`**: Contains the core animation logic.
-
-### Animation Principle (`animate.ts`)
-
-The animation generation process is fully automated and does not require users to manually set keyframes. The main steps are as follows:
-
-1.  **Preprocessing and Metrics**:
-    - Traverse SVG child elements and hide all elements.
-    - Calculate the "metric" for each element: For `<path>` elements, calculate the total path length (`getTotalLength()`); for other elements like text or images, assign a fixed metric value.
-2.  **Time Allocation**:
-    - Allocate the total animation duration to each element based on the proportion of its metric to the total metric, ensuring that longer paths have longer drawing times for a more natural visual effect.
-3.  **Animation Generation (WAAPI)**:
-    - **Path Animation**: Use `stroke-dasharray` and `stroke-dashoffset` techniques to simulate handwriting effects. Also handles fills, fading in the fill color after the outline is drawn.
-    - **Non-Path Animation (Text/Images)**: Use simple opacity fade-in effects.
-    - **Timing Control**: Control the playback order of elements via the `delay` property and set slight overlap times to make the animation smoother.
-4.  **Control and Looping**:
-    - Returns a controller object (`controller`) supporting `play`, `pause`, `cancel`, and `seek` operations.
-    - Loop playback is implemented by triggering `animateSvg` again via `setTimeout` after the animation ends.
-
-The advantage of this approach is the ability to accurately capture complex WAAPI-driven SVG animations, not limited to simple CSS transformations. Install dependencies
-
-## Project Sources
-
-(1) https://github.com/korbinzhao/excalidraw-cn  
-(2) https://github.com/excalidraw/excalidraw
+1. https://github.com/korbinzhao/excalidraw-cn  
+2. https://github.com/excalidraw/excalidraw  
+3. https://github.com/dai-shi/excalidraw-animate  
+4. https://github.com/sindrel/excalidraw-converter  

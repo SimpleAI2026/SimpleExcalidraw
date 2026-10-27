@@ -1,33 +1,46 @@
 ![中文文档](./README.md)  
 ![English Document](./README.en.md)
 
+SimpleExcalidraw 是 [Excalidraw](https://github.com/excalidraw/excalidraw) 的定制 fork：中文手写体、多画布、AI 生成、Mermaid 转换、绘图动画回放。
+
 ## 功能
 
-- [x] 中文手写体
-- [x] 多画布功能
-- [x] 多模板增加字段适配脚本
-- [x] 增加选择颜色种类
-- [ ] 增加边框样式
-- [ ] 增加字体选择
-- [x] 优化手机端体验
-- [x] 增加 AI 生成功能
-- [x] 修复解析 pdf 文件的问题
-- [x] 增加动画展示效果
+- [x] 中文手写体（Zhushiti 回退栈）
+- [x] 多画布（应用内切换，无需整页刷新；删除/重命名校验与兜底）
+- [x] 多模板字段适配脚本
+- [x] 更多颜色选项
+- [ ] 边框样式
+- [ ] 字体选择 UI（字体文件与回退已接入，选择器未做）
+- [x] 移动端体验优化（AI Modal 小屏全宽、工具栏横向滚动等）
+- [x] AI 生成（替换 / 插入 / 新建画布；可取消；PDF/md/txt/csv 灌入 Prompt）
+- [x] Mermaid → Excalidraw 转换（输入清洗、唯一 render id）
+- [x] 选中线段后可拖中点连续折弯
+- [x] 绘图动画回放（可暂停 / 取消）
+- [x] 暗色主题下定制 Modal 可读性
+
+更细的缺陷与阶段规划见 [`plan/`](./plan/README.md)。
 
 ## 截图
 
 ![](./dev-docs/images/ScreenShot1.png)  
 ![](./dev-docs/images/ScreenShot2.png)
 
-## 环境变量
+## AI 助手说明
 
-```
-REACT_APP_AI_API= // 你的 AI 接口地址，样例：https://api.openai.com/v1/chat/completions
-REACT_APP_AI_SECRET= // 请勿写入前端环境变量；在应用内填写密钥，或通过自有后端代理转发
-REACT_APP_AI_MODEL= // 你的 AI 模型名称，样例：gpt-3.5-turbo
+1. 打开 AI 助手，填写 **API 地址**、**模型**；**密钥**在面板中粘贴（仅存当前标签页的 `sessionStorage`，关页即清）。
+2. 生成结果可选 **替换当前画布 / 插入当前画布 / 新建画布**；空结果不会清空画布。
+3. 可上传 `.md` / `.txt` / `.csv` / `.pdf`（单文件 ≤ 2MB，Prompt 最长约 9000 字，超限会截断并提示）。
+4. 生产环境建议走自有 BFF，不要把密钥写进前端环境变量；指引见 [`api/README.md`](./api/README.md)。
+
+## 环境变量（可选默认值）
+
+```bash
+# 可选：默认接口与模型（会打进前端包，勿放密钥）
+REACT_APP_AI_API=https://api.openai.com/v1/chat/completions
+REACT_APP_AI_MODEL=gpt-4o-mini
 ```
 
-> **安全提示**：`REACT_APP_AI_SECRET` 会被打包进浏览器 JS，**不要**把真实密钥写进 `REACT_APP_*`。请在 AI 助手面板中由用户填写，或走后端代理。`REACT_APP_AI_API` / `REACT_APP_AI_MODEL` 可作为可选默认值。
+> **不要**设置 `REACT_APP_AI_SECRET`：CRA 会把它打进浏览器 JS。密钥请在 AI 面板填写，或由后端代理注入。
 
 ## 使用地址
 
@@ -35,121 +48,58 @@ https://excalidraw-phi-woad.vercel.app/
 
 ## 本地安装
 
-以下步骤将帮助你在本地环境中运行该项目以进行开发和测试。
-
 ### 环境要求
 
-- [Node.js](https://nodejs.org/en/)
-- [Yarn](https://yarnpkg.com/getting-started/install)（v1 或 v2.4.2+）
+- [Node.js](https://nodejs.org/en/)（仓库 `.nvmrc` 为 14；实际开发可用更高 Node，建议 ≥ 18）
+- [Yarn Classic v1](https://yarnpkg.com/getting-started/install)（**不要用 Yarn Berry / 2+**；本仓库 lockfile 为 v1，见 `.yarnrc`）
 - [Git](https://git-scm.com/downloads)
 
-### 克隆仓库
+若本机 `yarn -v` 显示 2.x+：
+
+```bash
+npm i -g yarn@1.22.22
+# 或临时：npx yarn@1.22.22
+```
+
+### 克隆与启动
 
 ```bash
 git clone https://github.com/linkxzhou/SimpleExcalidraw.git
-```
-
-### 安装依赖
-
-```bash
+cd SimpleExcalidraw
 yarn
+yarn start   # 等同 yarn dev；默认 http://localhost:3000
 ```
-
-### 启动服务
-
-```bash
-yarn dev
-```
-
-现在可以打开 [http://localhost:3000](http://localhost:3000) 并开始在你喜欢的编辑器中编码。
 
 ### 协作
 
-如果需要协作，请在本地配置协作服务器（collab server）：https://github.com/excalidraw/excalidraw-room
+如需实时协作，需自行部署 collab server：https://github.com/excalidraw/excalidraw-room
 
 ### 常用命令
 
-#### 安装依赖
-
-```
-yarn
-```
-
-#### 运行项目
-
-```
-yarn start
-```
-
-#### 使用 Prettier 统一格式
-
-```
-yarn fix
-```
-
-#### 运行测试
-
-```
-yarn test
-```
-
-#### 更新测试快照
-
-```
-yarn test:update
-```
-
-#### 检查代码格式（Prettier）
-
-```
-yarn test:code
-```
+| 命令 | 说明 |
+| --- | --- |
+| `yarn` / `yarn start` | 安装依赖 / 本地开发 |
+| `yarn build` | 生产构建 |
+| `yarn fix` | Prettier + ESLint 自动修复 |
+| `yarn test` | 跑测试 |
+| `yarn test:update` | 更新测试快照 |
+| `yarn test:code` | 仅检查 ESLint |
 
 ### Docker Compose
 
-如果不想在本地搭建 Node.js 环境，可以使用 docker-compose 在本地开发 Excalidraw。
+不想本地装 Node 时：
 
 ```sh
 docker-compose up --build -d
 ```
 
-## 动画实现
+## 动画实现（简要）
 
-本项目实现了一个基于 SVG 和 Web Animations API (WAAPI) 的画板动画功能，允许用户回放绘图过程。
-
-### 核心架构
-
-动画模块主要位于 `src/animate` 目录下，由以下几个核心部分组成：
-
-1.  **`AnimateApp.tsx`**: 动画功能的入口组件，以模态框 (Modal) 形式展示。它负责管理全局状态（如时长、循环开关、暂停状态），并协调 `Viewer` 和 `AnimateConfig` 组件。
-2.  **`Viewer.tsx`**: 负责渲染 SVG 内容和执行动画。
-    - 它首先调用 `exportToSvg` 将当前画板内容转换为 SVG DOM。
-    - 然后调用 `animateSvg` 对 SVG 元素应用动画效果。
-3.  **`AnimateConfig.tsx`**: 提供用户控制界面，包括时长选择、循环开关、重播按钮。
-4.  **`animate.ts`**: 包含核心动画逻辑。
-
-### 动画原理 (`animate.ts`)
-
-动画生成过程完全自动化，无需用户手动设定关键帧。主要步骤如下：
-
-1.  **预处理与度量**：
-    - 遍历 SVG 子元素，隐藏所有元素。
-    - 计算每个元素的“度量值” (Metric)：对于 `<path>` 元素，计算其路径总长度 (`getTotalLength()`)；对于文本或图片等其他元素，赋予固定度量值。
-2.  **时间分配**：
-    - 根据每个元素的度量值占总度量值的比例，将总动画时长分配给每个元素，确保长路径的绘制时间更长，视觉效果更自然。
-3.  **动画生成 (WAAPI)**：
-    - **路径动画 (Paths)**：利用 `stroke-dasharray` 和 `stroke-dashoffset` 技术模拟笔迹书写效果。同时处理填充 (Fill)，在轮廓绘制完成后淡入填充颜色。
-    - **非路径动画 (Text/Images)**：使用简单的透明度渐变 (`opacity`) 淡入效果。
-    - **时序控制**：通过 `delay` 属性控制元素按顺序播放，并设置微小的重叠时间，使动画更加流畅。
-4.  **控制与循环**：
-    - 返回一个控制器对象 (`controller`)，支持 `play` (播放), `pause` (暂停), `cancel` (取消), `seek` (跳转) 操作。
-    - 循环播放通过 `setTimeout` 在动画结束后重新触发 `animateSvg` 实现。
-
-这种方案的优点是能够精确捕捉 WAAPI 驱动的复杂 SVG 动画，不仅限于简单的 CSS 变换。
+模块在 `src/animate/`：把画布导出为 SVG，按路径长度分配时长，用 WAAPI（`stroke-dashoffset` 等）回放笔迹；支持播放 / 暂停 / 取消 / 循环。入口为 `AnimateApp.tsx`（Modal），核心逻辑在 `animate.ts`。
 
 ## 项目来源
 
-（1）https://github.com/korbinzhao/excalidraw-cn  
-（2）https://github.com/excalidraw/excalidraw  
-（3）https://github.com/dai-shi/excalidraw-animate/tree/main?tab=readme-ov-file  
-（4）https://github.com/sindrel/excalidraw-converter
+1. https://github.com/korbinzhao/excalidraw-cn  
+2. https://github.com/excalidraw/excalidraw  
+3. https://github.com/dai-shi/excalidraw-animate  
+4. https://github.com/sindrel/excalidraw-converter  
