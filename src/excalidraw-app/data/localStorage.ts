@@ -177,7 +177,6 @@ export const setElementsToStorage = (elements: ExcalidrawElement[] = []) => {
   localStorage.setItem(currentContainerName, JSON.stringify(elements));
 };
 
-
 export type ContainerNameInvalidReason = "empty" | "reserved" | "duplicate";
 
 export type ContainerNameValidation =
@@ -216,7 +215,9 @@ export const validateContainerName = (
 export const renameContainerNameToStorage = (
   oldName: string,
   newName: string,
-): { ok: true; name: string } | { ok: false; reason: ContainerNameInvalidReason | "missing" } => {
+):
+  | { ok: true; name: string }
+  | { ok: false; reason: ContainerNameInvalidReason | "missing" } => {
   if (!(oldName && newName)) {
     console.warn(
       `oldName: ${oldName}, newName: ${newName} 不同时存在，无法重命名`,

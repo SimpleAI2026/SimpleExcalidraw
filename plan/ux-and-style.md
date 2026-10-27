@@ -16,7 +16,7 @@
 
 ### U-02 AI 等待 3–5 分钟反馈不足 — P1
 
-- **现象**：工具栏 title 写了「生成时间需要3–5分钟」（`locales/zh-CN.json` `toolBar.aiAssistant`），但 Modal 内仅 Button `loading`，无进度、无取消、无超时文案
+- **现象**：工具栏 title 写了「生成时间需要 3–5 分钟」（`locales/zh-CN.json` `toolBar.aiAssistant`），但 Modal 内仅 Button `loading`，无进度、无取消、无超时文案
 - **路径**：`AiButton.tsx`；`requestCompletions` 支持 `signal` 但 UI **未传 AbortController**
 - **方向**：显示「请求中…可取消」；超时提示；关闭 Modal 时 abort；勿把耗时写进 toolbar title（改到 Modal 说明区）
 
@@ -78,12 +78,12 @@
 
 ### S-02 暗色主题下硬编码浅色 — P1
 
-| 位置 | 硬编码 |
-| --- | --- |
-| `SwitchContainerDialog.tsx` | `#333` / `#e2e2e2` / `green` |
-| `InputPreview` | `color: #999` |
-| `AnimateApp.tsx` | `#fafafa` / `#f0f0f0` |
-| `AiButton.tsx` | `#e3e2fe` / `#fafafa` mask 渐变 |
+| 位置                        | 硬编码                          |
+| --------------------------- | ------------------------------- |
+| `SwitchContainerDialog.tsx` | `#333` / `#e2e2e2` / `green`    |
+| `InputPreview`              | `color: #999`                   |
+| `AnimateApp.tsx`            | `#fafafa` / `#f0f0f0`           |
+| `AiButton.tsx`              | `#e3e2fe` / `#fafafa` mask 渐变 |
 
 - **方向**：改用 `var(--color-*)` / `var(--text-primary-color)` / theme 感知
 
@@ -134,4 +134,3 @@
 3. 有内容画布上点 AI 生成失败 / 取消，画布元素数量不变
 4. 唯一画布不可删除；重名为 reserved key 被拒绝并提示
 5. 键盘可完成：打开 AI → Tab 到 Prompt → Esc 关闭且 abort 请求
-

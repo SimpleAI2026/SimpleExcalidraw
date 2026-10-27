@@ -100,4 +100,3 @@
 | 2026-10-27 (Asia/Shanghai) | **本机落地 Phase 0 全部 + Phase 1**：P0.1–P0.6、P1.1–P1.8；顺带 P2.8 repository + `RESERVED` 拼写。P1.6 用 CSS 变量替换硬编码色（未接 antd ConfigProvider token）；P1.7 AI Modal 小屏全宽 + 移动工具栏 `overflow-x: auto`。跳过 P2.1–P2.7。未 commit/push。 |
 | 2026-10-27 (Asia/Shanghai) | **Phase 2 大项落地**：P2.1 in-app 多画布切换（CustomEvent + `containerLifecycle`，去 reload）；P2.2 删画布 best-effort fileId 回收；P2.3 secret→sessionStorage + `api/README.md` BFF 指引；P2.4 Zhushiti 回退栈 + `plan/fonts.md`（无 woff2 大改）；P2.5 hit-test threshold clamp/触控；P2.6 根级 antd ConfigProvider；P2.7 yarn classic 锁定与文档。未做完整 BFF 实现、字体子集、强制 CI、依赖级 tsc 大修。未 commit/push。 |
 | 2026-10-27 (Asia/Shanghai) | **体验/可靠性补丁（未 commit）**：选中多段线可持续拖中点折弯；`withNewIds` 补 binding/group/frame；新建画布先写内容再改名单+回滚；AI `max_tokens`/`enable_thinking` 按供应商收敛；上传 2MB+9000 截断；Hint/笔误；`plan/bugs.md` 对齐。跳过密钥清理（用户要求）。 |
-

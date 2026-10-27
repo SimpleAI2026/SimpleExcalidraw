@@ -2,7 +2,15 @@ import React, { useState, useEffect, useRef } from "react";
 import clsx from "clsx";
 import { ToolButton, ToolButtonSize } from "./ToolButton";
 import { AIIcon } from "./icons";
-import { Button, Modal, Input, Upload, message, AutoComplete, Radio } from "antd";
+import {
+  Button,
+  Modal,
+  Input,
+  Upload,
+  message,
+  AutoComplete,
+  Radio,
+} from "antd";
 import "./AiDialog.scss";
 import {
   requestCompletions,
@@ -426,7 +434,6 @@ export const AIButton: React.FC<AIButtonProps> = (props) => {
       </label>
     </div>
   );
-
 
   const handleExcalidrawSubmit = async () => {
     if (

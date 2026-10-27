@@ -665,7 +665,9 @@ describe("textWysiwyg", () => {
       });
       expect(
         (h.elements[1] as ExcalidrawTextElementWithContainer).fontFamily,
-      ).toEqual(FONT_FAMILY["Virgil, Zhushiti, HanziPen SC, Cangnanshoujiti, KaiTi"]);
+      ).toEqual(
+        FONT_FAMILY["Virgil, Zhushiti, HanziPen SC, Cangnanshoujiti, KaiTi"],
+      );
 
       //redo
       Keyboard.withModifierKeys({ ctrl: true, shift: true }, () => {

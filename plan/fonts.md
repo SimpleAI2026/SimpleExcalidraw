@@ -2,8 +2,7 @@
 
 ## 当前产品行为
 
-- 手绘字体（`FONT_FAMILY` id `1`）CSS 栈：
-  `Virgil, Zhushiti, HanziPen SC, Cangnanshoujiti, KaiTi`
+- 手绘字体（`FONT_FAMILY` id `1`）CSS 栈： `Virgil, Zhushiti, HanziPen SC, Cangnanshoujiti, KaiTi`
 - 浏览器按序回退：先 Virgil（拉丁），中文优先 `Zhushiti`（打包 TTF），再系统 `HanziPen SC` / `Cangnanshoujiti` / `KaiTi`。
 - UI 仍只有上游三档：手绘 / 正常（Helvetica）/ 代码（Cascadia）。独立「中文字体选择」未做（README 未完成项）。
 
