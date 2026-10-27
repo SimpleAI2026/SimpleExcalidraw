@@ -21,6 +21,8 @@ import { FileManager } from "./FileManager";
 import { Locker } from "./Locker";
 import { updateBrowserStateVersion } from "./tabSync";
 import { getContainerNameFromStorage } from "./localStorage";
+import { message } from "antd";
+import { t } from "../../i18n";
 
 const filesStore = createStore("files-db", "files-store");
 
@@ -61,8 +63,19 @@ const saveDataStateToLocalStorage = (
     );
     updateBrowserStateVersion(STORAGE_KEYS.VERSION_DATA_STATE);
   } catch (error: any) {
-    // Unable to access window.localStorage
+    // Unable to access window.localStorage / quota
     console.error(error);
+    if (
+      error?.name === "QuotaExceededError" ||
+      error?.code === 22 ||
+      error?.code === 1014
+    ) {
+      try {
+        message.error(t("other.storageQuotaExceeded"));
+      } catch {
+        // ignore toast failures
+      }
+    }
   }
 };
 

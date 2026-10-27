@@ -8,30 +8,38 @@ import { Button } from "./Button";
 import { message } from "antd";
 import {
   getContainerListFromStorage,
-  setContainerNameToStorage,
   setContainerListToStorage,
-  setElementsToStorage,
+  validateContainerName,
 } from "../excalidraw-app/data/localStorage";
-import { RESVERED_LOCALSTORAGE_KEYS } from "../excalidraw-app/app_constants";
+import { requestContainerChange } from "../excalidraw-app/data/containerLifecycle";
 
 export const NewSceneDialog = ({
-  // elements,
   appState,
   setAppState,
-}: // files
-{
+}: {
   appState: AppState;
   setAppState: React.Component<any, AppState>["setState"];
-  // elements: readonly NonDeletedExcalidrawElement[];
-  // files: BinaryFiles;
-  // exportPadding?: number;
   actionManager: ActionManager;
 }) => {
   const handleClose = React.useCallback(() => {
     setAppState({ openDialog: null });
   }, [setAppState]);
 
-  const [newContainerName, setNewContainerName] = useState(appState.name);
+  const [newContainerName, setNewContainerName] = useState(
+    `canvas-${Date.now()}`,
+  );
+
+  const showValidationError = (reason: string) => {
+    if (reason === "empty") {
+      message.error(t("canvasError.canvasNameEmpty"));
+    } else if (reason === "duplicate") {
+      message.error(
+        `${newContainerName.trim()} ${t("canvasError.canvasRepeat")}`,
+      );
+    } else {
+      message.error(t("canvasError.canvasNameInvalid"));
+    }
+  };
 
   return (
     <>
@@ -61,24 +69,37 @@ export const NewSceneDialog = ({
             }}
             onSelect={() => {
               const containerList: string[] = getContainerListFromStorage();
-
-              if (containerList.includes(newContainerName)) {
-                message.error(
-                  `${newContainerName} ${t("canvasError.canvasRepeat")}`,
-                );
+              const validation = validateContainerName(newContainerName, {
+                existingNames: containerList,
+              });
+              if (!validation.ok) {
+                showValidationError(validation.reason);
                 return;
               }
 
-              if (RESVERED_LOCALSTORAGE_KEYS.includes(newContainerName)) {
-                message.error(t("canvasError.canvasNameInvalid"));
+              // Write empty elements first, then append the name.
+              // If either fails, roll back so the list never keeps a hollow name.
+              try {
+                localStorage.setItem(validation.name, JSON.stringify([]));
+              } catch (error) {
+                console.error(error);
+                message.error(t("other.storageQuotaExceeded"));
+                return;
+              }
+              try {
+                setContainerListToStorage([...containerList, validation.name]);
+              } catch (error) {
+                console.error(error);
+                try {
+                  localStorage.removeItem(validation.name);
+                } catch {
+                  // ignore
+                }
+                message.error(t("other.storageQuotaExceeded"));
                 return;
               }
 
-              setContainerNameToStorage(newContainerName);
-              setContainerListToStorage([...containerList, newContainerName]);
-              setElementsToStorage([]);
-
-              window.location.reload();
+              requestContainerChange({ type: "new", name: validation.name });
             }}
           >
             {t("buttons.confirm")}

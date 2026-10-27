@@ -567,7 +567,7 @@
   }
 
   .App-toolbar--mobile {
-    overflow-x: hidden;
+    overflow-x: auto;
     max-width: 100vw;
 
     .ToolIcon__keybinding {

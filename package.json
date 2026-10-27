@@ -85,7 +85,8 @@
     "rewire": "6.0.0"
   },
   "engines": {
-    "node": ">=14.0.0"
+    "node": ">=14",
+    "yarn": "1.x"
   },
   "homepage": ".",
   "jest": {
@@ -124,7 +125,9 @@
     "test": "yarn test:app",
     "autorelease": "node scripts/autorelease.js",
     "prerelease": "node scripts/prerelease.js",
-    "release": "node scripts/release.js"
+    "release": "node scripts/release.js",
+    "toolchain:note": "node -e \"console.log('Use Yarn Classic 1.x (lockfile v1). Yarn 4 will fail on this lockfile. Node 16-20 recommended.')\""
   },
-  "repository": "git@github.com:linkxzhou/excalidraw-plus.git"
+  "repository": "git@github.com:linkxzhou/SimpleExcalidraw.git",
+  "packageManager": "yarn@1.22.22"
 }

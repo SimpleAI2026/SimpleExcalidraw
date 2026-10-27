@@ -5,7 +5,7 @@ import {
   getDefaultAppState,
 } from "../../appState";
 import { clearElementsForLocalStorage } from "../../element";
-import { STORAGE_KEYS } from "../app_constants";
+import { RESERVED_LOCALSTORAGE_KEYS, STORAGE_KEYS } from "../app_constants";
 import { ImportedDataState } from "../../data/types";
 
 export const saveUsernameToLocalStorage = (username: string) => {
@@ -132,7 +132,7 @@ export const setContainerNameToStorage = (name: string) => {
 };
 
 export const getContainerIdFromStorage = () => {
-  localStorage.getItem(STORAGE_KEYS.LOCAL_STORAGE_CONTAINER_ID);
+  return localStorage.getItem(STORAGE_KEYS.LOCAL_STORAGE_CONTAINER_ID);
 };
 
 export const getContainerNameFromStorage = () => {
@@ -177,34 +177,81 @@ export const setElementsToStorage = (elements: ExcalidrawElement[] = []) => {
   localStorage.setItem(currentContainerName, JSON.stringify(elements));
 };
 
+
+export type ContainerNameInvalidReason = "empty" | "reserved" | "duplicate";
+
+export type ContainerNameValidation =
+  | { ok: true; name: string }
+  | { ok: false; reason: ContainerNameInvalidReason };
+
+/** Shared validation for new canvas / rename (trim, non-empty, reserved, duplicate). */
+export const validateContainerName = (
+  rawName: string,
+  options?: { existingNames?: string[]; excludeName?: string },
+): ContainerNameValidation => {
+  const name = (rawName ?? "").trim();
+  if (!name) {
+    return { ok: false, reason: "empty" };
+  }
+
+  const reserved = RESERVED_LOCALSTORAGE_KEYS as readonly string[];
+  if (
+    reserved.includes(name) ||
+    name.startsWith("excalidraw_") ||
+    name.startsWith("excalidraw-") ||
+    name.startsWith("simpleexcalidraw_")
+  ) {
+    return { ok: false, reason: "reserved" };
+  }
+
+  const list = options?.existingNames ?? getContainerListFromStorage();
+  const exclude = options?.excludeName;
+  if (list.some((n) => n === name && n !== exclude)) {
+    return { ok: false, reason: "duplicate" };
+  }
+
+  return { ok: true, name };
+};
+
 export const renameContainerNameToStorage = (
   oldName: string,
   newName: string,
-) => {
+): { ok: true; name: string } | { ok: false; reason: ContainerNameInvalidReason | "missing" } => {
   if (!(oldName && newName)) {
     console.warn(
       `oldName: ${oldName}, newName: ${newName} 不同时存在，无法重命名`,
     );
+    return { ok: false, reason: "missing" };
   }
 
-  const elements = getElementsFromStorage();
+  const validation = validateContainerName(newName, {
+    excludeName: oldName,
+  });
+  if (!validation.ok) {
+    return validation;
+  }
 
-  setContainerNameToStorage(newName);
+  const trimmed = validation.name;
+  if (trimmed === oldName) {
+    return { ok: true, name: trimmed };
+  }
 
-  setElementsToStorage(elements);
+  const elements = getElementsFromStorage(oldName);
 
+  setContainerNameToStorage(trimmed);
+  localStorage.setItem(trimmed, JSON.stringify(elements));
   localStorage.removeItem(oldName);
 
   const containerList = getContainerListFromStorage();
-
   const newContainerList = containerList.map((name: string) => {
     if (name === oldName) {
-      return newName;
+      return trimmed;
     }
     return name;
   });
 
   setContainerListToStorage(newContainerList);
+  return { ok: true, name: trimmed };
 };
 
 export const removeContainerFromStorage = (containerName: string) => {

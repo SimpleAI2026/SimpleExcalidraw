@@ -37,16 +37,18 @@
   font-weight: 700;
 }
 
+/* Chinese handwriting fallbacks for Virgil stack (see plan/fonts.md).
+   Source files are Light cuts — declare weight 400. woff2/subset deferred. */
 @font-face {
   font-family: "Zhushiti";
   src: url("YangRenDongZhuShiTi-Light-2.ttf");
   font-display: swap;
-  font-weight: 700;
+  font-weight: 400;
 }
 
 @font-face {
   font-family: "Cangnanshoujiti";
   src: url("YeZiGongChangCangNanShouJi-2.ttf");
   font-display: swap;
-  font-weight: 700;
+  font-weight: 400;
 }

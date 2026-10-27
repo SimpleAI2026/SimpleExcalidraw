@@ -10,29 +10,75 @@ export type AISettings = {
 };
 
 const AI_SETTINGS_STORAGE_KEY = "simpleexcalidraw_ai_settings";
+/** Session-only secret storage (P2.3 / B-02). Cleared when the tab closes. */
+const AI_SECRET_SESSION_KEY = "simpleexcalidraw_ai_secret_session";
 
 export function loadAISettings(): AISettings {
+  // Never bake REACT_APP_AI_SECRET into client defaults (B-02).
+  // API/model env defaults are optional convenience; secret must be user-entered.
   const envDefaults: AISettings = {
     api: (process.env.REACT_APP_AI_API || "").trim() || undefined,
-    secret: (process.env.REACT_APP_AI_SECRET || "").trim() || undefined,
     model: (process.env.REACT_APP_AI_MODEL || "").trim() || undefined,
   };
 
   try {
     const raw = localStorage.getItem(AI_SETTINGS_STORAGE_KEY);
     const saved = raw ? JSON.parse(raw) : {};
-    return { ...envDefaults, ...saved };
+    // Strip any historically persisted plaintext secret from localStorage.
+    const { secret: _legacySecret, ...rest } = saved || {};
+    void _legacySecret;
+    let secret: string | undefined;
+    try {
+      secret = sessionStorage.getItem(AI_SECRET_SESSION_KEY) || undefined;
+    } catch {
+      secret = undefined;
+    }
+    // One-time migration: if an old plaintext secret is still in localStorage,
+    // move it to sessionStorage and rewrite localStorage without it.
+    if (!secret && typeof saved?.secret === "string" && saved.secret) {
+      const migratedSecret = saved.secret;
+      secret = migratedSecret;
+      try {
+        sessionStorage.setItem(AI_SECRET_SESSION_KEY, migratedSecret);
+      } catch {
+        // ignore
+      }
+      try {
+        localStorage.setItem(
+          AI_SETTINGS_STORAGE_KEY,
+          JSON.stringify({ ...rest }),
+        );
+      } catch {
+        // ignore
+      }
+    }
+    return { ...envDefaults, ...rest, secret };
   } catch (e) {
-    console.error("loadAISettings error: ", e);
+    if (process.env.NODE_ENV !== "production") {
+      console.error("loadAISettings error: ", e);
+    }
     return envDefaults;
   }
 }
 
+/** Persist non-secret AI settings to localStorage; secret goes to sessionStorage only. */
 export function saveAISettings(settings: AISettings) {
   try {
-    localStorage.setItem(AI_SETTINGS_STORAGE_KEY, JSON.stringify(settings));
+    const { secret, ...rest } = settings || {};
+    localStorage.setItem(AI_SETTINGS_STORAGE_KEY, JSON.stringify(rest));
+    try {
+      if (secret && String(secret).trim()) {
+        sessionStorage.setItem(AI_SECRET_SESSION_KEY, String(secret));
+      } else {
+        sessionStorage.removeItem(AI_SECRET_SESSION_KEY);
+      }
+    } catch {
+      // sessionStorage may be unavailable
+    }
   } catch (e) {
-    console.error("saveAISettings error: ", e);
+    if (process.env.NODE_ENV !== "production") {
+      console.error("saveAISettings error: ", e);
+    }
   }
 }
 
@@ -149,7 +195,7 @@ function extractIdeas(data: any): any {
 export async function requestCompletions({
   api,
   secret,
-  model = "gpt-5",
+  model = "gpt-4o-mini",
   temperature = 0.7,
   prompt,
   signal,
@@ -167,13 +213,22 @@ export async function requestCompletions({
     throw new Error("Prompt, model, and endpoint are required");
   }
 
-  const body = {
+  // Keep max_tokens within common provider limits; SiliconFlow-style
+  // enable_thinking only when the endpoint looks like that family.
+  const endpointLower = endpoint.toLowerCase();
+  const isSiliconFlowLike =
+    endpointLower.includes("siliconflow") ||
+    endpointLower.includes("dashscope") ||
+    endpointLower.includes("moonshot");
+  const body: Record<string, unknown> = {
     model,
     messages: [{ role: "user", content: prompt }],
     temperature,
-    max_tokens: 63000,
-    enable_thinking: false,
+    max_tokens: isSiliconFlowLike ? 8192 : 4096,
   };
+  if (isSiliconFlowLike) {
+    body.enable_thinking = false;
+  }
 
   try {
     const res = await fetch(endpoint, {
@@ -186,11 +241,32 @@ export async function requestCompletions({
       "application/json",
     );
     const data = isJson ? await res.json() : await res.text();
+
+    if (!res.ok) {
+      const bodyPreview =
+        typeof data === "string"
+          ? data.slice(0, 300)
+          : JSON.stringify(data)?.slice(0, 300);
+      const err = new Error(
+        `AI request failed (${res.status}): ${bodyPreview || res.statusText}`,
+      );
+      (err as any).status = res.status;
+      (err as any).body = bodyPreview;
+      throw err;
+    }
+
     const ideas = extractIdeas(data);
-    console.log("AI response", data, ideas);
+    if (process.env.NODE_ENV !== "production") {
+      console.log("AI response", data, ideas);
+    }
     return { data, ideas, isJson, endpoint };
-  } catch (err) {
-    console.error("AI request failed", err);
+  } catch (err: any) {
+    if (err?.name === "AbortError") {
+      throw err;
+    }
+    if (process.env.NODE_ENV !== "production") {
+      console.error("AI request failed", err);
+    }
     throw err;
   }
 }

@@ -23,9 +23,11 @@
 
 ```
 REACT_APP_AI_API= // 你的 AI 接口地址，样例：https://api.openai.com/v1/chat/completions
-REACT_APP_AI_SECRET= // 你的 AI 接口密钥，样例：sk-1234567890abcdef1234567890abcdef
+REACT_APP_AI_SECRET= // 请勿写入前端环境变量；在应用内填写密钥，或通过自有后端代理转发
 REACT_APP_AI_MODEL= // 你的 AI 模型名称，样例：gpt-3.5-turbo
 ```
+
+> **安全提示**：`REACT_APP_AI_SECRET` 会被打包进浏览器 JS，**不要**把真实密钥写进 `REACT_APP_*`。请在 AI 助手面板中由用户填写，或走后端代理。`REACT_APP_AI_API` / `REACT_APP_AI_MODEL` 可作为可选默认值。
 
 ## 使用地址
 

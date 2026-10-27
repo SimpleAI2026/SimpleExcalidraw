@@ -199,9 +199,14 @@ const renderLinearPointHandles = (
   const points = LinearElementEditor.getPointsGlobalCoordinates(element);
 
   const { POINT_HANDLE_SIZE } = LinearElementEditor;
-  const radius = appState.editingLinearElement
-    ? POINT_HANDLE_SIZE
-    : POINT_HANDLE_SIZE / 2;
+  const isSelectedLinear =
+    appState.selectedLinearElement?.elementId === element.id;
+  // Full-size handles while editing, or when the selected polyline shows
+  // segment midpoints (easier to grab for continuous bends).
+  const radius =
+    appState.editingLinearElement || (isSelectedLinear && points.length > 2)
+      ? POINT_HANDLE_SIZE
+      : POINT_HANDLE_SIZE / 2;
   points.forEach((point, idx) => {
     const isSelected =
       !!appState.editingLinearElement?.selectedPointsIndices?.includes(idx);
@@ -255,13 +260,19 @@ const renderLinearPointHandles = (
           false,
         );
       }
-    } else if (appState.editingLinearElement || points.length === 2) {
+    } else if (
+      appState.editingLinearElement ||
+      points.length === 2 ||
+      isSelectedLinear
+    ) {
       renderSingleLinearPoint(
         context,
         appState,
         renderConfig,
         segmentMidPoint,
-        POINT_HANDLE_SIZE / 2,
+        points.length === 2 && !appState.editingLinearElement
+          ? POINT_HANDLE_SIZE / 2
+          : radius / 2,
         false,
         true,
       );

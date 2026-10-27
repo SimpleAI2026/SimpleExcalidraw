@@ -1,5 +1,6 @@
 import clsx from "clsx";
 import React from "react";
+import { message } from "antd";
 import { ActionManager } from "../actions/manager";
 import { CLASSES, LIBRARY_SIDEBAR_WIDTH } from "../constants";
 import { exportCanvas } from "../data";
@@ -52,8 +53,9 @@ import { isHandToolActive } from "../appState";
 import { TunnelsContext, useInitializeTunnels } from "./context/tunnels";
 import {
   getContainerNameFromStorage,
-  renameContainerNameToStorage,
+  validateContainerName,
 } from "../excalidraw-app/data/localStorage";
+import { requestContainerChange } from "../excalidraw-app/data/containerLifecycle";
 import InputPreview from "./InputPreview";
 
 interface LayerUIProps {
@@ -263,7 +265,7 @@ const LayerUI = ({
       elements,
     );
 
-    const currentContainerName = getContainerNameFromStorage();
+    const currentContainerName = appState.name || getContainerNameFromStorage();
 
     return (
       <FixedSideContainer side="top">
@@ -279,7 +281,30 @@ const LayerUI = ({
               <InputPreview
                 defaultValue={currentContainerName}
                 onSave={(value) => {
-                  renameContainerNameToStorage(currentContainerName, value);
+                  const validation = validateContainerName(String(value), {
+                    excludeName: currentContainerName,
+                  });
+                  if (!validation.ok) {
+                    if (validation.reason === "empty") {
+                      message.error(t("canvasError.canvasNameEmpty"));
+                    } else if (validation.reason === "duplicate") {
+                      message.error(
+                        `${String(value).trim()} ${t(
+                          "canvasError.canvasRepeat",
+                        )}`,
+                      );
+                    } else if (validation.reason === "reserved") {
+                      message.error(t("canvasError.canvasNameInvalid"));
+                    }
+                    return false;
+                  }
+                  if (validation.name !== currentContainerName) {
+                    requestContainerChange({
+                      type: "rename",
+                      oldName: currentContainerName,
+                      newName: validation.name,
+                    });
+                  }
                 }}
               />
             </Stack.Row>

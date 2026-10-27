@@ -252,7 +252,7 @@
     "resize": "您可以按住SHIFT来限制比例大小，\n按住ALT来调整中心大小",
     "resizeImage": "按住SHIFT可以自由缩放，\n按住ALT可以从中间缩放",
     "rotate": "旋转时可以按住 Shift 来约束角度",
-    "lineEditor_info": "按住 CtrlOrCmd 并双击或按 CtrlOrmd + Enter 来编辑点",
+    "lineEditor_info": "拖动线段中点可折弯；按住 CtrlOrCmd 并双击或按 CtrlOrCmd + Enter 可编辑多段点",
     "lineEditor_pointSelected": "按下 Delete 移除点，Ctrl 或 Cmd+D 以复制，拖动以移动",
     "lineEditor_nothingSelected": "选择要编辑的点 (按住 SHIFT 选择多个)，\n或按住 Alt 并点击以添加新点",
     "placeImage": "点击放置图像，或者点击并拖动以手动设置图像大小",
@@ -266,7 +266,9 @@
     "canvasTooBig": "画布可能过大。",
     "canvasTooBigTip": "提示：尝试将最远的元素移动到和其它元素更近一些。",
     "canvasRepeat": "已存在，无需重复创建",
-    "canvasNameInvalid": "请不要以 excalidraw_ 开头进行画布命名"
+    "canvasNameInvalid": "画布名不能为空，不能与系统保留名冲突（如 excalidraw-state、excalidraw_container_name 等），也不能与已有画布重名",
+    "canvasNameEmpty": "画布名称不能为空",
+    "canvasLastCannotDelete": "不能删除最后一个画布"
   },
   "errorSplash": {
     "headingMain_pre": "遇到异常。请尝试",
@@ -575,7 +577,9 @@
     "animateLoop": "循环",
     "animateReplay": "重播",
     "animatePlay": "播放动画",
-    "aiUploadHint": "上传文件，支持解析.md,.txt,.csv,.pdf",
+    "aiUploadHint": "上传文件（.md / .txt / .csv / .pdf）",
+    "aiPromptTruncated": "内容过长，已截断到 9000 字",
+    "aiFileTooLarge": "文件超过 2MB，请缩小后再上传",
     "aiUpdateSceneFailed": "AI更新场景失败，请检查配置",
     "aiRequestFailed": "AI请求失败，请检查配置",
     "aiInvalidParams": "请求参数无效，请检查配置",
@@ -583,7 +587,23 @@
     "aiPdfParseSuccess": "PDF解析完成，已填充到提示词",
     "aiPdfParseFailed": "PDF解析失败，请尝试上传.md/.txt/.csv",
     "aiFileSupportError": "仅支持 .md/.txt/.csv/.pdf",
-    "aiParseError": "文件解析失败"
+    "aiParseError": "文件解析失败",
+    "animateTitle": "Excalidraw 动画",
+    "animatePause": "暂停",
+    "animateEmptyDisabled": "空画布无法播放动画",
+    "aiModelPlaceholder": "选择或输入模型名称",
+    "aiEmptyResult": "AI 未返回有效图形，已保留当前画布",
+    "aiCancelled": "已取消 AI 请求",
+    "aiReplaceConfirm": "将如何应用 AI 结果到当前画布？替换会覆盖现有内容。",
+    "aiApplyModeTitle": "应用 AI 结果",
+    "aiModeReplace": "替换当前画布",
+    "aiModeInsert": "插入到当前画布",
+    "aiModeNewCanvas": "新建画布",
+    "aiMermaidInvalid": "Mermaid 语法无效或不支持的图表类型",
+    "deleteCanvasConfirm": "确定删除 {{name}} 吗?",
+    "storageQuotaExceeded": "本地存储空间不足，保存失败。请导出备份或删除旧画布。",
+    "aiSecretSessionWarning": "API Key 仅保存在当前标签页（sessionStorage），关闭标签后清除。生产环境建议使用自建代理。",
+    "aiProxyHint": "可选：将 API 指向自建 /api/ai-proxy（见 api/README.md）。"
   },
   "welcomeScreen": {
     "app": {

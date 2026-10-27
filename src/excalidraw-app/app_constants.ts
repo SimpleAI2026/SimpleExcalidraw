@@ -51,13 +51,22 @@ export const isExcalidrawPlusSignedUser = document.cookie.includes(
   COOKIES.AUTH_STATE_COOKIE,
 );
 
-export const RESVERED_LOCALSTORAGE_KEYS = [
+/** Reserved localStorage keys that must not be used as canvas names. */
+export const RESERVED_LOCALSTORAGE_KEYS = [
+  "excalidraw",
   "excalidraw_container_list",
   "excalidraw_container_id",
+  "excalidraw_container_name",
   "excalidraw-state",
   "excalidraw-collab",
   "excalidraw-library",
   "excalidraw-theme",
   "version-dataState",
   "version-files",
-];
+  "simpleexcalidraw_ai_settings",
+  "simpleexcalidraw_container_viewports",
+  "simpleexcalidraw_ai_secret_session",
+] as const;
+
+/** @deprecated Use RESERVED_LOCALSTORAGE_KEYS */
+export const RESVERED_LOCALSTORAGE_KEYS = RESERVED_LOCALSTORAGE_KEYS;

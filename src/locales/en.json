@@ -253,7 +253,7 @@
     "resize": "You can constrain proportions by holding SHIFT while resizing,\nhold ALT to resize from the center",
     "resizeImage": "You can resize freely by holding SHIFT,\nhold ALT to resize from the center",
     "rotate": "You can constrain angles by holding SHIFT while rotating",
-    "lineEditor_info": "Hold CtrlOrCmd and Double-click or press CtrlOrCmd + Enter to edit points",
+    "lineEditor_info": "Drag a midpoint to bend the line; hold CtrlOrCmd and double-click or press CtrlOrCmd + Enter to edit points",
     "lineEditor_pointSelected": "Press Delete to remove point(s),\nCtrlOrCmd+D to duplicate, or drag to move",
     "lineEditor_nothingSelected": "Select a point to edit (hold SHIFT to select multiple),\nor hold Alt and click to add new points",
     "placeImage": "Click to place the image, or click and drag to set its size manually",
@@ -268,7 +268,9 @@
     "canvasTooBig": "The canvas may be too big.",
     "canvasTooBigTip": "Tip: try moving the farthest elements a bit closer together.",
     "canvasRepeat": "{defaultValue}",
-    "canvasNameInvalid": "{defaultValue}"
+    "canvasNameInvalid": "Name cannot be empty, reserved (e.g. excalidraw-state, excalidraw_container_name), or duplicate",
+    "canvasNameEmpty": "Canvas name cannot be empty",
+    "canvasLastCannotDelete": "Cannot delete the last canvas"
   },
   "errorSplash": {
     "headingMain_pre": "Encountered an error. Try ",
@@ -577,7 +579,9 @@
     "animateLoop": "Loop",
     "animateReplay": "Replay",
     "animatePlay": "Play Animation",
-    "aiUploadHint": "Upload file, supports .md,.txt,.csv,.pdf",
+    "aiUploadHint": "Upload file (.md / .txt / .csv / .pdf)",
+    "aiPromptTruncated": "Prompt was truncated to 9000 characters",
+    "aiFileTooLarge": "File exceeds 2MB; please upload a smaller file",
     "aiUpdateSceneFailed": "AI failed to update scene, please check configuration",
     "aiRequestFailed": "AI request failed, please check configuration",
     "aiInvalidParams": "Request parameters are invalid, please check configuration",
@@ -585,7 +589,23 @@
     "aiPdfParseSuccess": "PDF parsing completed, prompt updated",
     "aiPdfParseFailed": "PDF parsing failed, please try uploading .md/.txt/.csv",
     "aiFileSupportError": "Only supports .md/.txt/.csv/.pdf",
-    "aiParseError": "File parsing failed"
+    "aiParseError": "File parsing failed",
+    "animateTitle": "Excalidraw Animation",
+    "animatePause": "Pause",
+    "animateEmptyDisabled": "Cannot play animation on an empty canvas",
+    "aiModelPlaceholder": "Select or type a model name",
+    "aiEmptyResult": "AI returned no valid elements; current scene kept",
+    "aiCancelled": "AI request cancelled",
+    "aiReplaceConfirm": "How should the AI result be applied? Replace will overwrite the current scene.",
+    "aiApplyModeTitle": "Apply AI result",
+    "aiModeReplace": "Replace current canvas",
+    "aiModeInsert": "Insert into current canvas",
+    "aiModeNewCanvas": "Create new canvas",
+    "aiMermaidInvalid": "Invalid Mermaid syntax or unsupported diagram type",
+    "deleteCanvasConfirm": "Delete {{name}}?",
+    "storageQuotaExceeded": "Local storage quota exceeded; save failed. Export a backup or delete old canvases.",
+    "aiSecretSessionWarning": "API key is kept in this tab only (sessionStorage) and is cleared when the tab closes. Prefer a self-hosted proxy in production.",
+    "aiProxyHint": "Optional: point API at your own /api/ai-proxy (see api/README.md)."
   },
   "welcomeScreen": {
     "app": {

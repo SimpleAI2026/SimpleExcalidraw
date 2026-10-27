@@ -1,6 +1,7 @@
 import polyfill from "../polyfill";
 import LanguageDetector from "i18next-browser-languagedetector";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, useMemo } from "react";
+import { ConfigProvider, theme as antdTheme } from "antd";
 import { trackEvent } from "../analytics";
 import { getDefaultAppState } from "../appState";
 import { ErrorDialog } from "../components/ErrorDialog";
@@ -66,6 +67,12 @@ import {
   importUsernameFromLocalStorage,
   getAllContainerListElementsFromStorage,
 } from "./data/localStorage";
+import {
+  CONTAINER_CHANGE_EVENT,
+  ContainerChangeDetail,
+  applyContainerChange,
+  saveContainerViewport,
+} from "./data/containerLifecycle";
 import CustomStats from "./CustomStats";
 import { restore, restoreAppState, RestoredDataState } from "../data/restore";
 
@@ -236,6 +243,9 @@ export const langCodeAtom = atom(
 
 const ExcalidrawWrapper = () => {
   const [errorMessage, setErrorMessage] = useState("");
+  const [containerName, setContainerName] = useState(() =>
+    getContainerNameFromStorage(),
+  );
   const [langCode, setLangCode] = useAtom(langCodeAtom);
   // initial state
   // ---------------------------------------------------------------------------
@@ -471,6 +481,33 @@ const ExcalidrawWrapper = () => {
     };
   }, [collabAPI, excalidrawAPI, setLangCode]);
 
+  // P2.1 / U-04: in-app multi-canvas switch (no location.reload)
+  useEffect(() => {
+    if (!excalidrawAPI) {
+      return;
+    }
+    const onContainerChange = (event: Event) => {
+      const detail = (event as CustomEvent<ContainerChangeDetail>).detail;
+      if (!detail) {
+        return;
+      }
+      void (async () => {
+        try {
+          const nextName = await applyContainerChange(excalidrawAPI, detail);
+          setContainerName(nextName);
+        } catch (error) {
+          console.error("container change failed", error);
+          // Fallback only if in-app switch blows up
+          window.location.reload();
+        }
+      })();
+    };
+    window.addEventListener(CONTAINER_CHANGE_EVENT, onContainerChange);
+    return () => {
+      window.removeEventListener(CONTAINER_CHANGE_EVENT, onContainerChange);
+    };
+  }, [excalidrawAPI]);
+
   useEffect(() => {
     const unloadHandler = (event: BeforeUnloadEvent) => {
       LocalData.flushSave();
@@ -523,6 +560,11 @@ const ExcalidrawWrapper = () => {
     // this check is redundant, but since this is a hot path, it's best
     // not to evaludate the nested expression every time
     if (!LocalData.isSavePaused()) {
+      try {
+        saveContainerViewport(getContainerNameFromStorage(), appState);
+      } catch {
+        // ignore viewport persist failures
+      }
       LocalData.save(elements, appState, files, () => {
         if (excalidrawAPI) {
           let didChange = false;
@@ -605,67 +647,109 @@ const ExcalidrawWrapper = () => {
     localStorage.setItem(STORAGE_KEYS.LOCAL_STORAGE_LIBRARY, serializedItems);
   };
 
+  const antdThemeConfig = useMemo(() => {
+    const isDark = theme === THEME.DARK;
+    return {
+      algorithm: isDark ? antdTheme.darkAlgorithm : antdTheme.defaultAlgorithm,
+      token: {
+        colorPrimary: "var(--color-primary, #6965db)",
+        colorLink: "var(--color-primary, #6965db)",
+        colorBgContainer: "var(--input-bg-color, #ffffff)",
+        colorBgElevated: "var(--island-bg-color, #ffffff)",
+        colorBgLayout: "var(--default-bg-color, #ffffff)",
+        colorText: "var(--text-primary-color, rgba(0, 0, 0, 0.88))",
+        colorTextHeading: "var(--text-primary-color, rgba(0, 0, 0, 0.88))",
+        colorTextSecondary: "var(--color-gray-50, rgba(0, 0, 0, 0.65))",
+        colorBorder: "var(--dialog-border-color, #ebebeb)",
+        colorBorderSecondary: "var(--dialog-border-color, #ebebeb)",
+        colorFillSecondary: "var(--popup-secondary-bg-color, #f5f5f5)",
+        borderRadius: 6,
+        fontFamily: "var(--ui-font, Assistant, system-ui, sans-serif)",
+      },
+      components: {
+        Modal: {
+          contentBg: "var(--island-bg-color, #ffffff)",
+          headerBg: "var(--island-bg-color, #ffffff)",
+          footerBg: "var(--island-bg-color, #ffffff)",
+          titleColor: "var(--text-primary-color, rgba(0, 0, 0, 0.88))",
+          colorBgMask: "rgba(18, 18, 18, 0.2)",
+          borderRadiusLG: 6,
+          contentPadding: 0,
+          headerPadding: "1.25rem 1.5rem 0.75rem",
+          bodyPadding: "1rem 1.5rem 1.25rem",
+          footerPadding: "0.75rem 1.5rem 1.25rem",
+          headerMarginBottom: 0,
+          footerMarginTop: 0,
+          headerBorderBottom: "1px solid var(--dialog-border-color, #ebebeb)",
+          footerBorderTop: "1px solid var(--dialog-border-color, #ebebeb)",
+        },
+      },
+    };
+  }, [theme]);
+
   return (
-    <div
-      style={{ height: "100%" }}
-      className={clsx("excalidraw-app", {
-        "is-collaborating": isCollaborating,
-      })}
-    >
-      <Excalidraw
-        ref={excalidrawRefCallback}
-        name={getContainerNameFromStorage()}
-        onChange={onChange}
-        initialData={initialStatePromiseRef.current.promise}
-        isCollaborating={isCollaborating}
-        onPointerUpdate={collabAPI?.onPointerUpdate}
-        UIOptions={{
-          canvasActions: {
-            toggleTheme: true,
-            export: {
-              onExportToBackend,
-              renderCustomUI: (elements, appState, files) => {
-                return (
-                  <ExportToExcalidrawPlus
-                    elements={elements}
-                    appState={appState}
-                    files={files}
-                    onError={(error) => {
-                      excalidrawAPI?.updateScene({
-                        appState: {
-                          errorMessage: error.message,
-                        },
-                      });
-                    }}
-                  />
-                );
+    <ConfigProvider theme={antdThemeConfig}>
+      <div
+        style={{ height: "100%" }}
+        className={clsx("excalidraw-app", {
+          "is-collaborating": isCollaborating,
+        })}
+      >
+        <Excalidraw
+          ref={excalidrawRefCallback}
+          name={containerName}
+          onChange={onChange}
+          initialData={initialStatePromiseRef.current.promise}
+          isCollaborating={isCollaborating}
+          onPointerUpdate={collabAPI?.onPointerUpdate}
+          UIOptions={{
+            canvasActions: {
+              toggleTheme: true,
+              export: {
+                onExportToBackend,
+                renderCustomUI: (elements, appState, files) => {
+                  return (
+                    <ExportToExcalidrawPlus
+                      elements={elements}
+                      appState={appState}
+                      files={files}
+                      onError={(error) => {
+                        excalidrawAPI?.updateScene({
+                          appState: {
+                            errorMessage: error.message,
+                          },
+                        });
+                      }}
+                    />
+                  );
+                },
               },
             },
-          },
-        }}
-        langCode={langCode}
-        renderCustomStats={renderCustomStats}
-        detectScroll={false}
-        handleKeyboardGlobally={true}
-        onLibraryChange={onLibraryChange}
-        autoFocus={true}
-        theme={theme}
-      >
-        <AppMainMenu
-          setCollabDialogShown={setCollabDialogShown}
-          isCollaborating={isCollaborating}
-        />
-        {/* <AppWelcomeScreen setCollabDialogShown={setCollabDialogShown} /> */}
-        <AppFooter />
-      </Excalidraw>
-      {excalidrawAPI && <Collab excalidrawAPI={excalidrawAPI} />}
-      {errorMessage && (
-        <ErrorDialog
-          message={errorMessage}
-          onClose={() => setErrorMessage("")}
-        />
-      )}
-    </div>
+          }}
+          langCode={langCode}
+          renderCustomStats={renderCustomStats}
+          detectScroll={false}
+          handleKeyboardGlobally={true}
+          onLibraryChange={onLibraryChange}
+          autoFocus={true}
+          theme={theme}
+        >
+          <AppMainMenu
+            setCollabDialogShown={setCollabDialogShown}
+            isCollaborating={isCollaborating}
+          />
+          {/* <AppWelcomeScreen setCollabDialogShown={setCollabDialogShown} /> */}
+          <AppFooter />
+        </Excalidraw>
+        {excalidrawAPI && <Collab excalidrawAPI={excalidrawAPI} />}
+        {errorMessage && (
+          <ErrorDialog
+            message={errorMessage}
+            onClose={() => setErrorMessage("")}
+          />
+        )}
+      </div>
+    </ConfigProvider>
   );
 };
 

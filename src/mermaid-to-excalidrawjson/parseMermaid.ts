@@ -4,6 +4,7 @@ import { MERMAID_CONFIG } from "./constants";
 import { Flowchart, parseMermaidFlowChartDiagram } from "./parser/flowchart";
 import { Sequence, parseMermaidSequenceDiagram } from "./parser/sequence";
 import { Class, parseMermaidClassDiagram } from "./parser/class";
+import { nanoid } from "nanoid";
 
 // Fallback to Svg
 const convertSvgToGraphImage = (svgContainer: HTMLDivElement) => {
@@ -49,9 +50,12 @@ export const parseMermaid = async (
   // Parse the diagram
   const diagram = await mermaid.mermaidAPI.getDiagramFromText(definition);
 
-  // Render the SVG diagram
-  const { svg } = await mermaid.render("mermaid-to-excalidraw", definition);
-  console.info("svg", svg);
+  // Unique render id avoids collisions under concurrent / StrictMode calls (B-07)
+  const renderId = `mermaid-to-excalidraw-${nanoid()}`;
+  const { svg } = await mermaid.render(renderId, definition);
+  if (process.env.NODE_ENV !== "production") {
+    console.info("svg", svg);
+  }
 
   // Append Svg to DOM
   const svgContainer = document.createElement("div");
@@ -60,31 +64,34 @@ export const parseMermaid = async (
     `opacity: 0; position: relative; z-index: -1;`,
   );
   svgContainer.innerHTML = svg;
-  svgContainer.id = "mermaid-diagram";
+  svgContainer.id = `mermaid-diagram-${renderId}`;
   document.body.appendChild(svgContainer);
 
-  let data;
-  switch (diagram.type) {
-    case "flowchart-v2": {
-      data = parseMermaidFlowChartDiagram(diagram, svgContainer);
-      break;
-    }
+  try {
+    let data;
+    switch (diagram.type) {
+      case "flowchart-v2": {
+        data = parseMermaidFlowChartDiagram(diagram, svgContainer);
+        break;
+      }
 
-    case "sequence": {
-      data = parseMermaidSequenceDiagram(diagram, svgContainer);
-      break;
-    }
+      case "sequence": {
+        data = parseMermaidSequenceDiagram(diagram, svgContainer);
+        break;
+      }
 
-    case "classDiagram": {
-      data = parseMermaidClassDiagram(diagram, svgContainer);
-      break;
-    }
+      case "classDiagram": {
+        data = parseMermaidClassDiagram(diagram, svgContainer);
+        break;
+      }
 
-    // fallback to image if diagram type not-supported
-    default: {
-      data = convertSvgToGraphImage(svgContainer);
+      // fallback to image if diagram type not-supported
+      default: {
+        data = convertSvgToGraphImage(svgContainer);
+      }
     }
+    return data;
+  } finally {
+    svgContainer.remove();
   }
-  svgContainer.remove();
-  return data;
 };

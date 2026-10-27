@@ -2,6 +2,8 @@ import React, { useState } from "react";
 import { ToolButton } from "./ToolButton";
 import { AnimateApp } from "../animate/AnimateApp";
 import { t } from "../i18n";
+import { useExcalidrawElements } from "./App";
+import { message } from "antd";
 
 const PlayIcon = (
   <svg
@@ -20,6 +22,8 @@ const PlayIcon = (
 
 export const AnimateButton = () => {
   const [open, setOpen] = useState(false);
+  const elements = useExcalidrawElements();
+  const isEmpty = !elements?.length;
 
   return (
     <>
@@ -28,9 +32,18 @@ export const AnimateButton = () => {
         title={t("other.animatePlay")}
         aria-label={t("other.animatePlay")}
         icon={PlayIcon}
-        onClick={() => setOpen(true)}
+        className={isEmpty ? "disabled" : undefined}
+        onClick={() => {
+          if (isEmpty) {
+            message.info(t("other.animateEmptyDisabled"));
+            return;
+          }
+          setOpen(true);
+        }}
       />
-      {open && <AnimateApp open={open} onCancel={() => setOpen(false)} />}
+      {open && !isEmpty && (
+        <AnimateApp open={open} onCancel={() => setOpen(false)} />
+      )}
     </>
   );
 };

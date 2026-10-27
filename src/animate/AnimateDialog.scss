@@ -1,0 +1,85 @@
+@import "../css/variables.module";
+
+.excalidraw {
+  .AnimateModalRoot {
+    .ant-modal-mask {
+      background-color: rgba(18, 18, 18, 0.2);
+    }
+
+    .ant-modal-container {
+      background: var(--island-bg-color) !important;
+      color: var(--text-primary-color);
+      border: 1px solid var(--dialog-border-color);
+      box-shadow: var(--modal-shadow);
+      border-radius: 6px;
+      padding: 0 !important;
+      overflow: hidden;
+    }
+
+    .ant-modal-title {
+      color: var(--text-primary-color);
+      font-size: 1.25rem;
+      font-weight: 600;
+      line-height: 1.4;
+    }
+
+    .ant-modal-close {
+      color: var(--icon-fill-color);
+      top: 1rem;
+      inset-inline-end: 1rem;
+
+      &:hover {
+        color: var(--text-primary-color);
+        background: var(--button-hover-bg);
+      }
+    }
+
+    .ant-modal-header {
+      background: var(--island-bg-color) !important;
+      border-bottom: 1px solid var(--dialog-border-color);
+      margin-bottom: 0 !important;
+      padding: 1.25rem 1.5rem 0.75rem;
+      border-radius: 0;
+      color: var(--text-primary-color);
+    }
+
+    .ant-modal-body {
+      background: var(--island-bg-color) !important;
+      color: var(--text-primary-color);
+      padding: 1rem 1.5rem 1.25rem !important;
+      display: flex;
+      flex-direction: column;
+      min-height: 0;
+    }
+
+    .ant-modal-footer {
+      background: var(--island-bg-color) !important;
+      border-top: 1px solid var(--dialog-border-color);
+      margin-top: 0 !important;
+      padding: 0.75rem 1.5rem 1.25rem;
+      border-radius: 0;
+    }
+  }
+
+  .AnimateModal__body {
+    height: 100%;
+    min-height: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .AnimateModal__viewer {
+    flex: 1;
+    min-height: 0;
+    border: 1px solid var(--dialog-border-color);
+    border-radius: 6px;
+    overflow: hidden;
+    background: var(--island-bg-color);
+  }
+
+  .AnimateModal__config {
+    flex-shrink: 0;
+    color: var(--text-primary-color);
+  }
+}

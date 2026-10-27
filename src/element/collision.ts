@@ -57,6 +57,21 @@ const isElementDraggableFromInside = (
   return isDraggableFromInside || isImageElement(element);
 };
 
+/** Hit-test threshold in scene pixels (P2.5 / B-12 / H-2).
+ *  Dividing a screen-px base by zoom keeps feel stable while zooming;
+ *  clamp avoids hairline-miss at high zoom and huge halos when zoomed out.
+ *  Coarse pointers (touch) get a slightly larger base.
+ */
+const getHitTestThreshold = (zoomValue: number): number => {
+  const coarse =
+    typeof window !== "undefined" &&
+    typeof window.matchMedia === "function" &&
+    window.matchMedia("(pointer: coarse)").matches;
+  const baseScreenPx = coarse ? 16 : 12;
+  const raw = baseScreenPx / (zoomValue || 1);
+  return Math.min(28, Math.max(coarse ? 10 : 8, raw));
+};
+
 export const hitTest = (
   element: NonDeletedExcalidrawElement,
   appState: AppState,
@@ -64,7 +79,7 @@ export const hitTest = (
   y: number,
 ): boolean => {
   // How many pixels off the shape boundary we still consider a hit
-  const threshold = 12 / appState.zoom.value; // TODO: fix by linkxzhou
+  const threshold = getHitTestThreshold(appState.zoom.value);
   const point: Point = [x, y];
 
   if (
@@ -90,7 +105,7 @@ export const isHittingElementBoundingBoxWithoutHittingElement = (
   x: number,
   y: number,
 ): boolean => {
-  const threshold = 10 / appState.zoom.value;
+  const threshold = getHitTestThreshold(appState.zoom.value);
 
   // So that bound text element hit is considered within bounding box of container even if its outside actual bounding box of element
   // eg for linear elements text can be outside the element bounding box
@@ -110,7 +125,7 @@ export const isHittingElementNotConsideringBoundingBox = (
   appState: AppState,
   point: Point,
 ): boolean => {
-  const threshold = 12 / appState.zoom.value; // TODO: fix by linkxzhou
+  const threshold = getHitTestThreshold(appState.zoom.value);
   const check = isTextElement(element)
     ? isStrictlyInside
     : isElementDraggableFromInside(element)

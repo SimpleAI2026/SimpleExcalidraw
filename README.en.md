@@ -22,9 +22,11 @@
 
 ```
 REACT_APP_AI_API= // Your AI API endpoint, e.g., https://api.openai.com/v1/chat/completions
-REACT_APP_AI_SECRET= // Your AI API secret key, e.g., sk-1234567890abcdef1234567890abcdef
+REACT_APP_AI_SECRET= // Do NOT put secrets in frontend env; enter the key in the app UI, or proxy via your own backend
 REACT_APP_AI_MODEL= // Your AI model name, e.g., gpt-3.5-turbo
 ```
+
+> **Security**: `REACT_APP_AI_SECRET` is inlined into the browser bundle. **Do not** ship real secrets via `REACT_APP_*`. Have users enter the key in the AI assistant panel, or proxy through your backend. `REACT_APP_AI_API` / `REACT_APP_AI_MODEL` may be used as optional defaults.
 
 ## Live Demo
 

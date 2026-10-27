@@ -266,7 +266,9 @@
     "canvasTooBig": "畫布可能過大",
     "canvasTooBigTip": "提示：可嘗試將最遠的元素移動至較集中的位置",
     "canvasRepeat": "{defaultValue}",
-    "canvasNameInvalid": "{defaultValue}"
+    "canvasNameInvalid": "Name cannot be empty, reserved (e.g. excalidraw-state, excalidraw_container_name), or duplicate",
+    "canvasNameEmpty": "Canvas name cannot be empty",
+    "canvasLastCannotDelete": "Cannot delete the last canvas"
   },
   "errorSplash": {
     "headingMain_pre": "發生錯誤，嘗試",
@@ -583,7 +585,21 @@
     "aiPdfParseSuccess": "PDF解析完成，已填充到提示詞",
     "aiPdfParseFailed": "PDF解析失敗，請嘗試上傳.md/.txt/.csv",
     "aiFileSupportError": "僅支持 .md/.txt/.csv/.pdf",
-    "aiParseError": "文件解析失敗"
+    "aiParseError": "文件解析失敗",
+    "animateTitle": "Excalidraw Animation",
+    "animatePause": "Pause",
+    "animateEmptyDisabled": "Cannot play animation on an empty canvas",
+    "aiModelPlaceholder": "Select or type a model name",
+    "aiEmptyResult": "AI returned no valid elements; current scene kept",
+    "aiCancelled": "AI request cancelled",
+    "aiReplaceConfirm": "How should the AI result be applied? Replace will overwrite the current scene.",
+    "aiApplyModeTitle": "Apply AI result",
+    "aiModeReplace": "Replace current canvas",
+    "aiModeInsert": "Insert into current canvas",
+    "aiModeNewCanvas": "Create new canvas",
+    "aiMermaidInvalid": "Invalid Mermaid syntax or unsupported diagram type",
+    "deleteCanvasConfirm": "Delete {{name}}?",
+    "storageQuotaExceeded": "Local storage quota exceeded; save failed. Export a backup or delete old canvases."
   },
   "welcomeScreen": {
     "app": {

@@ -116,25 +116,34 @@ export const animateSvg = (
     currentDelay -= duration * 0.1;
   });
 
-  let timeoutId: any = null;
+  let timeoutId: ReturnType<typeof setTimeout> | null = null;
+  let childController: ReturnType<typeof animateSvg> | null = null;
+  let cancelled = false;
 
   const controller = {
     cancel: () => {
+      cancelled = true;
       animations.forEach((anim) => anim.cancel());
       if (timeoutId) {
         clearTimeout(timeoutId);
+        timeoutId = null;
+      }
+      if (childController) {
+        childController.cancel();
+        childController = null;
       }
     },
     pause: () => {
       animations.forEach((anim) => anim.pause());
       if (timeoutId) {
         clearTimeout(timeoutId);
+        timeoutId = null;
       }
+      childController?.pause();
     },
     play: () => {
       animations.forEach((anim) => anim.play());
-      // If we were waiting for loop, restart the timer or just rely on finish events?
-      // Simple approach: if playing, we assume the user wants to continue.
+      childController?.play();
     },
     seek: (time: number) => {
       animations.forEach((anim) => {
@@ -146,10 +155,13 @@ export const animateSvg = (
   if (opts.loop) {
     const totalDuration = currentDelay + 1000;
     timeoutId = setTimeout(() => {
+      if (cancelled) {
+        return;
+      }
       animations.forEach((anim) => anim.cancel());
       // Reset styles
       children.forEach((el) => (el.style.opacity = "0"));
-      animateSvg(svg, opts);
+      childController = animateSvg(svg, opts);
     }, totalDuration);
   }
 

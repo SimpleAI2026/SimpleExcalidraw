@@ -1,7 +1,11 @@
 import React, { useState, useRef, useEffect } from "react";
 import { Input, InputProps, InputRef } from "antd";
 
-function InputPreview(props: InputProps & { onSave?: (value: any) => void }) {
+function InputPreview(
+  props: InputProps & {
+    onSave?: (value: any) => boolean | void;
+  },
+) {
   const { defaultValue, onChange, onSave, ...extraProps } = props || {};
 
   const [isEditable, setIsEditable] = useState<boolean>(false);
@@ -24,7 +28,14 @@ function InputPreview(props: InputProps & { onSave?: (value: any) => void }) {
         }}
         onBlur={() => {
           setIsEditable(false);
-          onSave?.(value);
+          const next =
+            typeof value === "string" ? value.trim() : value ?? defaultValue;
+          const result = onSave?.(next);
+          if (result === false) {
+            setValue(defaultValue);
+          } else {
+            setValue(next);
+          }
         }}
         defaultValue={defaultValue}
         {...extraProps}
@@ -35,7 +46,12 @@ function InputPreview(props: InputProps & { onSave?: (value: any) => void }) {
   return (
     <span
       title={`${value || defaultValue}`}
-      style={{ cursor: "pointer", whiteSpace: "nowrap", color: "#999" }}
+      style={{
+        cursor: "pointer",
+        whiteSpace: "nowrap",
+        color: "var(--text-primary-color)",
+        opacity: 0.7,
+      }}
       onClick={() => {
         setIsEditable(true);
         setTimeout(() => {

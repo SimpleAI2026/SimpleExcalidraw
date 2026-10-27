@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import { t } from "../i18n";
 import { AppState } from "../types";
 import "./ExportDialog.scss";
@@ -7,10 +7,9 @@ import { Dialog } from "./Dialog";
 import {
   getContainerListFromStorage,
   getContainerNameFromStorage,
-  setContainerNameToStorage,
-  removeContainerFromStorage,
 } from "../excalidraw-app/data/localStorage";
-import { List, Popconfirm } from "antd";
+import { requestContainerChange } from "../excalidraw-app/data/containerLifecycle";
+import { List, Popconfirm, message } from "antd";
 import { CheckSquareOutlined, CloseCircleOutlined } from "@ant-design/icons";
 
 export const SwitchSceneDialog = ({
@@ -25,9 +24,35 @@ export const SwitchSceneDialog = ({
     setAppState({ openDialog: null });
   }, [setAppState]);
 
-  const containerList = getContainerListFromStorage();
+  // Force list refresh after in-app delete/new without full reload.
+  const [listVersion, setListVersion] = useState(0);
+  const containerList = React.useMemo(() => {
+    void listVersion;
+    return getContainerListFromStorage();
+  }, [listVersion]);
 
-  const currentContainerName = getContainerNameFromStorage();
+  React.useEffect(() => {
+    const bump = () => setListVersion((v) => v + 1);
+    window.addEventListener("simpleexcalidraw:container-change-applied", bump);
+    return () => {
+      window.removeEventListener(
+        "simpleexcalidraw:container-change-applied",
+        bump,
+      );
+    };
+  }, []);
+
+  const currentContainerName = appState.name || getContainerNameFromStorage();
+
+  const handleDelete = (scene: string) => {
+    const listBefore = getContainerListFromStorage();
+    if (listBefore.length <= 1) {
+      message.warning(t("canvasError.canvasLastCannotDelete"));
+      return;
+    }
+
+    requestContainerChange({ type: "delete", name: scene });
+  };
 
   return (
     <>
@@ -43,42 +68,61 @@ export const SwitchSceneDialog = ({
                     alignItems: "center",
                     justifyContent: "space-between",
                     padding: 10,
-                    borderBottom: `1px solid #e2e2e2`,
+                    borderBottom: `1px solid var(--default-border-color)`,
                   }}
                 >
                   <span
+                    role="button"
+                    tabIndex={0}
                     style={{
                       flex: "auto",
                       cursor: "pointer",
-                      color: `${
-                        currentContainerName === scene ? "green" : "#333"
-                      }`,
+                      color:
+                        currentContainerName === scene
+                          ? "var(--color-primary)"
+                          : "var(--text-primary-color)",
                     }}
                     onClick={() => {
-                      setContainerNameToStorage(scene);
-
-                      window.location.reload();
+                      if (scene === currentContainerName) {
+                        handleClose();
+                        return;
+                      }
+                      requestContainerChange({ type: "switch", name: scene });
+                    }}
+                    onKeyDown={(e) => {
+                      if (e.key === "Enter" || e.key === " ") {
+                        e.preventDefault();
+                        (e.currentTarget as HTMLElement).click();
+                      }
                     }}
                   >
                     {currentContainerName === scene ? (
                       <CheckSquareOutlined
-                        style={{ marginRight: 10, color: "green" }}
+                        style={{
+                          marginRight: 10,
+                          color: "var(--color-primary)",
+                        }}
                       />
                     ) : null}
                     {scene}
                   </span>
                   <Popconfirm
-                    title={`确定删除 ${scene} 吗?`}
-                    onConfirm={() => {
-                      removeContainerFromStorage(scene);
-                      if (currentContainerName === scene) {
-                        setContainerNameToStorage(containerList[0]);
-                      }
-                      window.location.reload();
-                    }}
+                    title={t("other.deleteCanvasConfirm", { name: scene })}
+                    onConfirm={() => handleDelete(scene)}
+                    disabled={containerList.length <= 1}
                   >
                     <CloseCircleOutlined
-                      style={{ display: "block", flex: 0, width: 20 }}
+                      aria-label={t("other.deleteCanvasConfirm", {
+                        name: scene,
+                      })}
+                      style={{
+                        display: "block",
+                        flex: 0,
+                        width: 20,
+                        opacity: containerList.length <= 1 ? 0.35 : 1,
+                        cursor:
+                          containerList.length <= 1 ? "not-allowed" : "pointer",
+                      }}
                     />
                   </Popconfirm>
                 </List.Item>

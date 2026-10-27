@@ -1,0 +1,292 @@
+@import "../css/variables.module";
+
+// Mounted inside .excalidraw via Modal getContainer so theme CSS vars resolve.
+// antd 6 panel class is .ant-modal-container (not .ant-modal-content).
+.excalidraw {
+  .AiModalRoot,
+  .AiApplyModalRoot {
+    .ant-modal-mask {
+      background-color: rgba(18, 18, 18, 0.2);
+    }
+
+    .ant-modal-container {
+      background: var(--island-bg-color) !important;
+      color: var(--text-primary-color);
+      border: 1px solid var(--dialog-border-color);
+      box-shadow: var(--modal-shadow);
+      border-radius: 6px;
+      padding: 0 !important;
+      overflow: hidden;
+    }
+
+    .ant-modal-title {
+      color: var(--text-primary-color);
+      font-size: 1.125rem;
+      font-weight: 600;
+      line-height: 1.4;
+      padding-right: 2rem;
+    }
+
+    .ant-modal-close {
+      color: var(--icon-fill-color);
+      top: 1rem;
+      inset-inline-end: 1rem;
+      width: 2rem;
+      height: 2rem;
+      border-radius: var(--border-radius-md);
+
+      &:hover {
+        color: var(--text-primary-color);
+        background: var(--button-hover-bg);
+      }
+    }
+
+    .ant-modal-header {
+      background: var(--island-bg-color) !important;
+      border-bottom: 1px solid var(--dialog-border-color);
+      margin-bottom: 0 !important;
+      padding: 1.25rem 1.5rem 0.875rem;
+      border-radius: 0;
+      color: var(--text-primary-color);
+    }
+
+    .ant-modal-body {
+      background: var(--island-bg-color) !important;
+      color: var(--text-primary-color);
+      padding: 1.25rem 1.5rem !important;
+    }
+
+    .ant-modal-footer {
+      background: var(--island-bg-color) !important;
+      border-top: 1px solid var(--dialog-border-color);
+      margin-top: 0 !important;
+      padding: 0.875rem 1.5rem 1.25rem;
+      border-radius: 0;
+    }
+
+    // Flat controls: no inner frame — only the modal outer border reads as a box.
+    .ant-input,
+    .ant-input-affix-wrapper,
+    .ant-input-password,
+    .ant-select-selector,
+    .ant-select-selection-search-input,
+    .ant-select-auto-complete .ant-select-selector,
+    textarea.ant-input {
+      background: var(--popup-secondary-bg-color) !important;
+      color: var(--text-primary-color) !important;
+      border: 1px solid transparent !important;
+      border-radius: var(--border-radius-md) !important;
+      box-shadow: none !important;
+    }
+
+    // Password / clear: avoid double border (wrapper + inner input).
+    .ant-input-affix-wrapper > input.ant-input,
+    .ant-input-password input.ant-input,
+    .ant-select-auto-complete .ant-select-selection-search-input {
+      background: transparent !important;
+      border: none !important;
+      box-shadow: none !important;
+    }
+
+    .ant-input:hover,
+    .ant-input-affix-wrapper:hover,
+    .ant-input-password:hover,
+    .ant-select-selector:hover,
+    textarea.ant-input:hover {
+      background: var(--button-hover-bg) !important;
+      border-color: transparent !important;
+    }
+
+    .ant-input:focus,
+    .ant-input-focused,
+    .ant-input-affix-wrapper-focused,
+    .ant-input-affix-wrapper:focus,
+    .ant-input-affix-wrapper:focus-within,
+    .ant-select-focused .ant-select-selector,
+    textarea.ant-input:focus {
+      border-color: var(--color-primary) !important;
+      box-shadow: 0 0 0 2px var(--color-primary-light) !important;
+      background: var(--input-bg-color) !important;
+    }
+
+    .ant-input::placeholder,
+    textarea.ant-input::placeholder {
+      color: var(--color-gray-50);
+    }
+
+    .ant-input-show-count-suffix {
+      color: var(--color-gray-50);
+      font-size: 0.75rem;
+    }
+
+    .ant-input-clear-icon,
+    .ant-input-password-icon {
+      color: var(--icon-fill-color);
+
+      &:hover {
+        color: var(--text-primary-color);
+      }
+    }
+
+    .ant-btn {
+      border-radius: var(--border-radius-md);
+      font-weight: 500;
+      box-shadow: none;
+    }
+
+    .ant-btn-default {
+      background: var(--island-bg-color);
+      color: var(--text-primary-color);
+      border-color: var(--default-border-color);
+
+      &:hover:not(:disabled) {
+        border-color: var(--color-primary) !important;
+        color: var(--color-primary) !important;
+        background: var(--color-primary-light) !important;
+      }
+    }
+
+    .ant-btn-primary {
+      background: var(--color-primary) !important;
+      border-color: var(--color-primary) !important;
+      color: #fff !important;
+
+      &:hover:not(:disabled) {
+        background: var(--color-primary-darker) !important;
+        border-color: var(--color-primary-darker) !important;
+      }
+
+      &:disabled,
+      &.ant-btn-disabled {
+        opacity: 0.45;
+      }
+    }
+
+    .ant-radio-wrapper {
+      color: var(--text-primary-color);
+    }
+
+    .ant-select-dropdown {
+      background: var(--popup-bg-color);
+      border: 1px solid var(--dialog-border-color);
+      border-radius: var(--border-radius-md);
+      box-shadow: var(--shadow-island);
+    }
+
+    .ant-select-item {
+      color: var(--text-primary-color);
+    }
+
+    .ant-select-item-option-active,
+    .ant-select-item-option-selected {
+      background: var(--color-primary-light) !important;
+    }
+  }
+
+  .AiModal__form {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+  }
+
+  .AiModal__field {
+    display: flex;
+    flex-direction: column;
+    gap: 0.375rem;
+    margin: 0;
+    min-width: 0;
+  }
+
+  .AiModal__label {
+    color: var(--input-label-color);
+    font-size: 0.8125rem;
+    font-weight: 500;
+    line-height: 1.3;
+  }
+
+  .AiModal__control {
+    width: 100%;
+    min-width: 0;
+  }
+
+  .AiModal__hint {
+    margin: -0.35rem 0 0;
+    padding: 0;
+    border: none;
+    background: transparent;
+    color: var(--color-gray-60);
+    font-size: 0.75rem;
+    line-height: 1.45;
+  }
+
+  .AiModal__prompt {
+    min-height: 220px;
+    resize: vertical;
+  }
+
+  .AiModal__footer {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+    width: 100%;
+  }
+
+  .AiModal__footerRow {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+    gap: 0.75rem;
+    width: 100%;
+
+    &--stack {
+      flex-direction: column;
+      align-items: stretch;
+    }
+  }
+
+  .AiModal__upload {
+    flex: 0 1 auto;
+    max-width: min(100%, 280px);
+    height: auto !important;
+    white-space: normal;
+    text-align: left;
+    line-height: 1.35;
+    padding: 0.375rem 0.75rem !important;
+  }
+
+  .AiModal__expand {
+    flex: 1 1 auto;
+    min-width: 7rem;
+  }
+
+  .AiModal__actions {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0.75rem;
+    width: 100%;
+  }
+
+  .AiModal__action {
+    width: 100%;
+  }
+
+  .AiApplyModal__hint {
+    margin: 0 0 0.75rem;
+    color: var(--text-primary-color);
+  }
+
+  .AiApplyModal__modes {
+    width: 100%;
+  }
+
+  @media (max-width: 500px) {
+    .AiModal__actions {
+      grid-template-columns: 1fr;
+    }
+
+    .AiModal__upload {
+      max-width: 100%;
+    }
+  }
+}

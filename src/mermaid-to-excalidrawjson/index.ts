@@ -41,7 +41,9 @@ const parseMermaidToExcalidraw = async (
     },
   });
 
-  console.log("parsedMermaidData: ", parsedMermaidData);
+  if (process.env.NODE_ENV !== "production") {
+    console.log("parsedMermaidData: ", parsedMermaidData);
+  }
 
   const { elements, files } = (() => {
     switch (parsedMermaidData.type) {

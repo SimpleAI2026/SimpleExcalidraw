@@ -38,6 +38,7 @@ export const AnimateConfig: React.FC<AnimateConfigProps> = ({
         flexDirection: "row",
         alignItems: "center",
         gap: 8,
+        flexWrap: "wrap",
       }}
     >
       <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
@@ -54,7 +55,9 @@ export const AnimateConfig: React.FC<AnimateConfigProps> = ({
         <Switch
           checked={loop}
           onChange={setLoop}
-          style={{ backgroundColor: loop ? "#6965db" : undefined }}
+          style={{
+            backgroundColor: loop ? "var(--color-primary)" : undefined,
+          }}
         />
       </div>
       <div
@@ -65,10 +68,16 @@ export const AnimateConfig: React.FC<AnimateConfigProps> = ({
           marginLeft: "auto",
         }}
       >
+        <Button onClick={() => setPaused(!paused)}>
+          {paused ? t("other.animatePlay") : t("other.animatePause")}
+        </Button>
         <Button
           onClick={onReplay}
           type="primary"
-          style={{ backgroundColor: "#6965db", borderColor: "#6965db" }}
+          style={{
+            backgroundColor: "var(--color-primary)",
+            borderColor: "var(--color-primary)",
+          }}
         >
           {t("other.animateReplay")}
         </Button>

@@ -30,6 +30,7 @@ export const Viewer: React.FC<ViewerProps> = ({
   } | null>(null);
   const svgRef = useRef<SVGSVGElement | null>(null);
   const pausedRef = useRef(paused);
+  const viewBackgroundColor = appState.viewBackgroundColor;
 
   useEffect(() => {
     pausedRef.current = paused;
@@ -43,6 +44,8 @@ export const Viewer: React.FC<ViewerProps> = ({
   }, [paused]);
 
   useEffect(() => {
+    let cancelled = false;
+
     const render = async () => {
       if (!containerRef.current) {
         return;
@@ -51,6 +54,12 @@ export const Viewer: React.FC<ViewerProps> = ({
       // Cleanup previous animation
       if (controllerRef.current) {
         controllerRef.current.cancel();
+        controllerRef.current = null;
+      }
+
+      if (!elements.length) {
+        containerRef.current.innerHTML = "";
+        return;
       }
 
       try {
@@ -58,10 +67,14 @@ export const Viewer: React.FC<ViewerProps> = ({
           elements,
           {
             exportBackground: true,
-            viewBackgroundColor: appState.viewBackgroundColor,
+            viewBackgroundColor,
           },
           null,
         );
+
+        if (cancelled || !containerRef.current) {
+          return;
+        }
 
         svgRef.current = svg;
         containerRef.current.innerHTML = "";
@@ -78,12 +91,22 @@ export const Viewer: React.FC<ViewerProps> = ({
           controller.pause();
         }
       } catch (error) {
-        console.error("Failed to render animation", error);
+        if (process.env.NODE_ENV !== "production") {
+          console.error("Failed to render animation", error);
+        }
       }
     };
 
     render();
-  }, [elements, appState, duration, loop, version]);
+
+    return () => {
+      cancelled = true;
+      if (controllerRef.current) {
+        controllerRef.current.cancel();
+        controllerRef.current = null;
+      }
+    };
+  }, [elements, viewBackgroundColor, duration, loop, version]);
 
   return (
     <div

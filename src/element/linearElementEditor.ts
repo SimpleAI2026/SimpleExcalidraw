@@ -401,11 +401,17 @@ export class LinearElementEditor {
   ): typeof editorMidPointsCache["points"] => {
     const boundText = getBoundTextElement(element);
 
-    // Since its not needed outside editor unless 2 pointer lines or bound text
+    // Outside the line editor, midpoints are only needed for:
+    // - 2-point lines (classic bend-to-polyline), or
+    // - the currently selected linear element (keep dragging bends), or
+    // - bound text layout.
+    const isSelectedLinear =
+      appState.selectedLinearElement?.elementId === element.id;
     if (
       !appState.editingLinearElement &&
       element.points.length > 2 &&
-      !boundText
+      !boundText &&
+      !isSelectedLinear
     ) {
       return [];
     }
@@ -474,7 +480,13 @@ export class LinearElementEditor {
       return null;
     }
     const points = LinearElementEditor.getPointsGlobalCoordinates(element);
-    if (points.length >= 3 && !appState.editingLinearElement) {
+    const isSelectedLinear =
+      appState.selectedLinearElement?.elementId === element.id;
+    if (
+      points.length >= 3 &&
+      !appState.editingLinearElement &&
+      !isSelectedLinear
+    ) {
       return null;
     }
 

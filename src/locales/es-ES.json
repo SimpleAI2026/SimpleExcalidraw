@@ -267,7 +267,9 @@
     "canvasTooBig": "El lienzo podría ser demasiado grande.",
     "canvasTooBigTip": "Sugerencia: intenta acercar un poco más los elementos más lejanos.",
     "canvasRepeat": "{defaultValue}",
-    "canvasNameInvalid": "{defaultValue}"
+    "canvasNameInvalid": "Name cannot be empty, reserved (e.g. excalidraw-state, excalidraw_container_name), or duplicate",
+    "canvasNameEmpty": "Canvas name cannot be empty",
+    "canvasLastCannotDelete": "Cannot delete the last canvas"
   },
   "errorSplash": {
     "headingMain_pre": "Se encontró un error. Intente ",
@@ -584,7 +586,21 @@
     "aiPdfParseSuccess": "Análisis de PDF completado, mensaje actualizado",
     "aiPdfParseFailed": "Fallo en el análisis de PDF, intente subir .md/.txt/.csv",
     "aiFileSupportError": "Solo soporta .md/.txt/.csv/.pdf",
-    "aiParseError": "Fallo en el análisis del archivo"
+    "aiParseError": "Fallo en el análisis del archivo",
+    "animateTitle": "Excalidraw Animation",
+    "animatePause": "Pause",
+    "animateEmptyDisabled": "Cannot play animation on an empty canvas",
+    "aiModelPlaceholder": "Select or type a model name",
+    "aiEmptyResult": "AI returned no valid elements; current scene kept",
+    "aiCancelled": "AI request cancelled",
+    "aiReplaceConfirm": "How should the AI result be applied? Replace will overwrite the current scene.",
+    "aiApplyModeTitle": "Apply AI result",
+    "aiModeReplace": "Replace current canvas",
+    "aiModeInsert": "Insert into current canvas",
+    "aiModeNewCanvas": "Create new canvas",
+    "aiMermaidInvalid": "Invalid Mermaid syntax or unsupported diagram type",
+    "deleteCanvasConfirm": "Delete {{name}}?",
+    "storageQuotaExceeded": "Local storage quota exceeded; save failed. Export a backup or delete old canvases."
   },
   "welcomeScreen": {
     "app": {
