@@ -76,14 +76,14 @@ yarn start   # 等同 yarn dev；默认 http://localhost:3000
 
 ### 常用命令
 
-| 命令 | 说明 |
-| --- | --- |
-| `yarn` / `yarn start` | 安装依赖 / 本地开发 |
-| `yarn build` | 生产构建 |
-| `yarn fix` | Prettier + ESLint 自动修复 |
-| `yarn test` | 跑测试 |
-| `yarn test:update` | 更新测试快照 |
-| `yarn test:code` | 仅检查 ESLint |
+| 命令                  | 说明                       |
+| --------------------- | -------------------------- |
+| `yarn` / `yarn start` | 安装依赖 / 本地开发        |
+| `yarn build`          | 生产构建                   |
+| `yarn fix`            | Prettier + ESLint 自动修复 |
+| `yarn test`           | 跑测试                     |
+| `yarn test:update`    | 更新测试快照               |
+| `yarn test:code`      | 仅检查 ESLint              |
 
 ### Docker Compose
 
@@ -99,7 +99,7 @@ docker-compose up --build -d
 
 ## 项目来源
 
-1. https://github.com/korbinzhao/excalidraw-cn  
-2. https://github.com/excalidraw/excalidraw  
-3. https://github.com/dai-shi/excalidraw-animate  
-4. https://github.com/sindrel/excalidraw-converter  
+1. https://github.com/korbinzhao/excalidraw-cn
+2. https://github.com/excalidraw/excalidraw
+3. https://github.com/dai-shi/excalidraw-animate
+4. https://github.com/sindrel/excalidraw-converter

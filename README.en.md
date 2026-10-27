@@ -76,14 +76,14 @@ For live collab, deploy a collab server: https://github.com/excalidraw/excalidra
 
 ### Commands
 
-| Command | Purpose |
-| --- | --- |
-| `yarn` / `yarn start` | Install / local dev |
-| `yarn build` | Production build |
-| `yarn fix` | Prettier + ESLint autofix |
-| `yarn test` | Run tests |
-| `yarn test:update` | Update snapshots |
-| `yarn test:code` | ESLint only |
+| Command               | Purpose                   |
+| --------------------- | ------------------------- |
+| `yarn` / `yarn start` | Install / local dev       |
+| `yarn build`          | Production build          |
+| `yarn fix`            | Prettier + ESLint autofix |
+| `yarn test`           | Run tests                 |
+| `yarn test:update`    | Update snapshots          |
+| `yarn test:code`      | ESLint only               |
 
 ### Docker Compose
 
@@ -97,7 +97,7 @@ Code lives under `src/animate/`: export the scene to SVG, allocate duration by p
 
 ## Project sources
 
-1. https://github.com/korbinzhao/excalidraw-cn  
-2. https://github.com/excalidraw/excalidraw  
-3. https://github.com/dai-shi/excalidraw-animate  
-4. https://github.com/sindrel/excalidraw-converter  
+1. https://github.com/korbinzhao/excalidraw-cn
+2. https://github.com/excalidraw/excalidraw
+3. https://github.com/dai-shi/excalidraw-animate
+4. https://github.com/sindrel/excalidraw-converter
