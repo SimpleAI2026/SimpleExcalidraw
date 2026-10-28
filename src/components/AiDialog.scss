@@ -209,6 +209,12 @@
     min-width: 0;
   }
 
+  .AiModal__inputSuffixSpacer {
+    display: inline-block;
+    width: 1em;
+    height: 1em;
+  }
+
   .AiModal__hint {
     margin: -0.35rem 0 0;
     padding: 0;

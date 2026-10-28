@@ -227,7 +227,7 @@
     "hand": "Hand (panning tool)",
     "aiAssistant": "AI Assistant (model limit, generation time takes 3-5 minutes)",
     "aiExpand": "AI Expand Prompt",
-    "aiAPI": "AI API",
+    "aiAPI": "AI BASE_URL",
     "aiAPIKey": "AI API Key",
     "aiModel": "AI Model",
     "aiPrompt": "AI Prompt",

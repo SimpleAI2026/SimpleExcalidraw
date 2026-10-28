@@ -226,7 +226,7 @@
     "eraser": "橡皮",
     "aiAssistant": "AI 助手（模型限制，生成时间需要3-5分钟）",
     "aiExpand": "AI 扩写",
-    "aiAPI": "AI API",
+    "aiAPI": "AI BASE_URL",
     "aiAPIKey": "AI 密钥",
     "aiModel": "AI 模型",
     "aiPrompt": "生成提示词",

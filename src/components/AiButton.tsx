@@ -103,10 +103,12 @@ const aiModalStyles: ModalProps["styles"] = {
 };
 
 const MODEL_OPTIONS = [
-  { value: "Pro/moonshotai/Kimi-K2.5", label: "Pro/moonshotai/Kimi-K2.5" },
-  { value: "Pro/zai-org/GLM-5", label: "Pro/zai-org/GLM-5" },
-  { value: "Pro/zai-org/GLM-4.7", label: "Pro/zai-org/GLM-4.7" },
-  { value: "deepseek-ai/DeepSeek-V3.2", label: "deepseek-ai/DeepSeek-V3.2" },
+  { value: "zai-org/GLM-5.3-Flash", label: "zai-org/GLM-5.3-Flash" },
+  {
+    value: "deepseek-ai/DeepSeek-V4.1-Flash",
+    label: "deepseek-ai/DeepSeek-V4.1-Flash",
+  },
+  { value: "Qwen/Qwen3.8-27B", label: "Qwen/Qwen3.8-27B" },
 ];
 
 const stripMermaidFences = (raw: string): string => {
@@ -205,9 +207,7 @@ export const AIButton: React.FC<AIButtonProps> = (props) => {
   const [textAreaValue, setTextAreaValue] = useState(defaults.prompt || "");
   const [api, setApi] = useState(defaults.api || "");
   const [secret, setSecret] = useState(defaults.secret || "");
-  const [model, setModel] = useState(
-    defaults.model || "Pro/moonshotai/Kimi-K2.5",
-  );
+  const [model, setModel] = useState(defaults.model || "zai-org/GLM-5.3-Flash");
   const [modelSearch, setModelSearch] = useState("");
   const [loadingExcalidraw, setLoadingExcalidraw] = useState(false);
   const [loadingMind, setLoadingMind] = useState(false);
@@ -382,7 +382,8 @@ export const AIButton: React.FC<AIButtonProps> = (props) => {
           value={api}
           onChange={(e) => setApi(e.target.value)}
           placeholder="https://api.openai.com/v1/chat/completions"
-          allowClear
+          autoComplete="off"
+          suffix={<span className="AiModal__inputSuffixSpacer" aria-hidden />}
         />
       </label>
       <label className="AiModal__field">

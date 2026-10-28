@@ -195,7 +195,7 @@ function extractIdeas(data: any): any {
 export async function requestCompletions({
   api,
   secret,
-  model = "gpt-4o-mini",
+  model = "zai-org/GLM-5.3-Flash",
   temperature = 0.7,
   prompt,
   signal,
