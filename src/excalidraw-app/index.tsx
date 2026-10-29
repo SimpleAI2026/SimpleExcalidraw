@@ -1,6 +1,12 @@
 import polyfill from "../polyfill";
 import LanguageDetector from "i18next-browser-languagedetector";
-import { useEffect, useRef, useState, useMemo } from "react";
+import React, {
+  useEffect,
+  useRef,
+  useState,
+  useMemo,
+  useCallback,
+} from "react";
 import { ConfigProvider, theme as antdTheme } from "antd";
 import { trackEvent } from "../analytics";
 import { getDefaultAppState } from "../appState";
@@ -93,6 +99,20 @@ import { parseLibraryTokensFromUrl, useHandleLibrary } from "../data/library";
 import { AppMainMenu } from "./components/AppMainMenu";
 // import { AppWelcomeScreen } from "./components/AppWelcomeScreen";
 import { AppFooter } from "./components/AppFooter";
+import {
+  SimpleChatSidebar,
+  type SimpleChatSidebarHandle,
+} from "../components/SimpleChatSidebar";
+import {
+  loadSidebarWidth,
+  clampSidebarWidth,
+  SC_WIDTH_DEFAULT,
+} from "../vendor/simplechat";
+import {
+  createExcalidrawChatTools,
+  buildAutoChatSystemPrompt,
+  migrateHostChatSettingsOnce,
+} from "../ai/simpleChatTools";
 
 polyfill();
 
@@ -647,6 +667,165 @@ const ExcalidrawWrapper = () => {
     localStorage.setItem(STORAGE_KEYS.LOCAL_STORAGE_LIBRARY, serializedItems);
   };
 
+  // —— SimpleChat 右侧面板 ——
+  const [chatOpen, setChatOpen] = useState(false);
+  const [aiPanelWidth, setAiPanelWidth] = useState(() => {
+    try {
+      return typeof loadSidebarWidth === "function"
+        ? loadSidebarWidth()
+        : SC_WIDTH_DEFAULT;
+    } catch {
+      return SC_WIDTH_DEFAULT;
+    }
+  });
+  const chatSidebarRef = useRef<SimpleChatSidebarHandle | null>(null);
+  const chatStorageKey = useMemo(
+    () => `simpleexcalidraw-chat-${containerName || "default"}`,
+    [containerName],
+  );
+
+  const applyAiPanelWidth = useCallback(
+    (width: number, { emitResize = true }: { emitResize?: boolean } = {}) => {
+      const next = clampSidebarWidth(Number(width) || SC_WIDTH_DEFAULT);
+      setAiPanelWidth(next);
+      try {
+        document.documentElement.style.setProperty(
+          "--ai-panel-width",
+          `${next}px`,
+        );
+      } catch {
+        // ignore
+      }
+      if (emitResize) {
+        try {
+          window.dispatchEvent(new Event("resize"));
+        } catch {
+          // ignore
+        }
+      }
+    },
+    [],
+  );
+
+  useEffect(() => {
+    applyAiPanelWidth(aiPanelWidth, { emitResize: false });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  useEffect(() => {
+    const onOpenChat = () => {
+      setChatOpen(true);
+      applyAiPanelWidth(aiPanelWidth || loadSidebarWidth());
+    };
+    window.addEventListener(
+      "simpleexcalidraw:open-chat",
+      onOpenChat as EventListener,
+    );
+    return () => {
+      window.removeEventListener(
+        "simpleexcalidraw:open-chat",
+        onOpenChat as EventListener,
+      );
+    };
+  }, [aiPanelWidth, applyAiPanelWidth]);
+
+  useEffect(() => {
+    if (!chatOpen) {
+      return;
+    }
+    migrateHostChatSettingsOnce(chatStorageKey);
+  }, [chatOpen, chatStorageKey]);
+
+  const chatTools = useMemo(
+    () =>
+      createExcalidrawChatTools({
+        getExcalidrawAPI: () => excalidrawAPI,
+      }),
+    [excalidrawAPI],
+  );
+
+  const autoChatSystemPrompt = useMemo(() => {
+    let selectionSummary = "";
+    let sceneSummary = "";
+    try {
+      if (excalidrawAPI) {
+        const elements = excalidrawAPI.getSceneElements();
+        const appState = excalidrawAPI.getAppState();
+        const selectedIds = appState?.selectedElementIds || {};
+        const selected = elements.filter((el) => selectedIds[el.id]);
+        selectionSummary = selected.length
+          ? selected
+              .slice(0, 20)
+              .map((el) => {
+                const text = (el as any).text
+                  ? ` text="${String((el as any).text).slice(0, 40)}"`
+                  : "";
+                return `- ${el.type}#${el.id.slice(0, 6)}${text}`;
+              })
+              .join("\n")
+          : "(none)";
+        const byType: Record<string, number> = {};
+        for (const el of elements) {
+          byType[el.type] = (byType[el.type] || 0) + 1;
+        }
+        sceneSummary = `total=${elements.length}; types=${JSON.stringify(
+          byType,
+        )}`;
+      }
+    } catch {
+      // ignore
+    }
+    return buildAutoChatSystemPrompt({
+      canvasName: containerName,
+      language: langCode,
+      selectionSummary,
+      sceneSummary,
+    });
+  }, [excalidrawAPI, containerName, langCode]);
+
+  const simpleChatConfig = useMemo(
+    () => ({
+      systemPrompt: autoChatSystemPrompt,
+      temperature: 0.6,
+    }),
+    [autoChatSystemPrompt],
+  );
+
+  const isDarkTheme = theme === THEME.DARK;
+  const simpleChatThemeStyle = useMemo(() => {
+    const panelBg = isDarkTheme ? "#0f172a" : "#ffffff";
+    const fg = isDarkTheme ? "#f5f5f5" : "#1f2937";
+    const muted = isDarkTheme ? "rgba(255,255,255,0.65)" : "#737373";
+    const mutedBg = isDarkTheme ? "rgba(255,255,255,0.08)" : "#f5f5f5";
+    const border = isDarkTheme ? "rgba(255,255,255,0.14)" : "#e5e5e5";
+    return {
+      "--sc-background": panelBg,
+      "--sc-foreground": fg,
+      "--sc-muted": muted,
+      "--sc-muted-bg": mutedBg,
+      "--sc-border": border,
+      "--sc-primary": isDarkTheme ? "#a5b4fc" : "#6965db",
+      "--sc-primary-fg": "#fafafa",
+      "--sc-assistant-bg": panelBg,
+      "--sc-assistant-border": border,
+      "--sc-ring": isDarkTheme ? "#a5b4fc" : "#6965db",
+    } as React.CSSProperties;
+  }, [isDarkTheme]);
+
+  const simpleChatThemeCss = useMemo(() => {
+    const lines = Object.entries(simpleChatThemeStyle).map(
+      ([k, v]) => `  ${k}: ${v};`,
+    );
+    return [":host {", ...lines, "}"].join("\n");
+  }, [simpleChatThemeStyle]);
+
+  const onChatPanelResize = useCallback(
+    (payload: { width: number }) => {
+      applyAiPanelWidth(payload?.width);
+    },
+    [applyAiPanelWidth],
+  );
+
   const antdThemeConfig = useMemo(() => {
     const isDark = theme === THEME.DARK;
     return {
@@ -690,63 +869,120 @@ const ExcalidrawWrapper = () => {
   return (
     <ConfigProvider theme={antdThemeConfig}>
       <div
-        style={{ height: "100%" }}
+        style={
+          {
+            height: "100%",
+            ["--ai-panel-width" as any]: `${aiPanelWidth}px`,
+          } as React.CSSProperties
+        }
         className={clsx("excalidraw-app", {
           "is-collaborating": isCollaborating,
+          "with-ai-panel": chatOpen,
         })}
       >
-        <Excalidraw
-          ref={excalidrawRefCallback}
-          name={containerName}
-          onChange={onChange}
-          initialData={initialStatePromiseRef.current.promise}
-          isCollaborating={isCollaborating}
-          onPointerUpdate={collabAPI?.onPointerUpdate}
-          UIOptions={{
-            canvasActions: {
-              toggleTheme: true,
-              export: {
-                onExportToBackend,
-                renderCustomUI: (elements, appState, files) => {
-                  return (
-                    <ExportToExcalidrawPlus
-                      elements={elements}
-                      appState={appState}
-                      files={files}
-                      onError={(error) => {
-                        excalidrawAPI?.updateScene({
-                          appState: {
-                            errorMessage: error.message,
-                          },
-                        });
-                      }}
-                    />
-                  );
+        <div className="excalidraw-app__canvas">
+          <Excalidraw
+            ref={excalidrawRefCallback}
+            name={containerName}
+            onChange={onChange}
+            initialData={initialStatePromiseRef.current.promise}
+            isCollaborating={isCollaborating}
+            onPointerUpdate={collabAPI?.onPointerUpdate}
+            UIOptions={{
+              canvasActions: {
+                toggleTheme: true,
+                export: {
+                  onExportToBackend,
+                  renderCustomUI: (elements, appState, files) => {
+                    return (
+                      <ExportToExcalidrawPlus
+                        elements={elements}
+                        appState={appState}
+                        files={files}
+                        onError={(error) => {
+                          excalidrawAPI?.updateScene({
+                            appState: {
+                              errorMessage: error.message,
+                            },
+                          });
+                        }}
+                      />
+                    );
+                  },
                 },
               },
-            },
-          }}
-          langCode={langCode}
-          renderCustomStats={renderCustomStats}
-          detectScroll={false}
-          handleKeyboardGlobally={true}
-          onLibraryChange={onLibraryChange}
-          autoFocus={true}
-          theme={theme}
-        >
-          <AppMainMenu
-            setCollabDialogShown={setCollabDialogShown}
-            isCollaborating={isCollaborating}
-          />
-          {/* <AppWelcomeScreen setCollabDialogShown={setCollabDialogShown} /> */}
-          <AppFooter />
-        </Excalidraw>
-        {excalidrawAPI && <Collab excalidrawAPI={excalidrawAPI} />}
-        {errorMessage && (
-          <ErrorDialog
-            message={errorMessage}
-            onClose={() => setErrorMessage("")}
-          />
+            }}
+            langCode={langCode}
+            renderCustomStats={renderCustomStats}
+            detectScroll={false}
+            handleKeyboardGlobally={true}
+            onLibraryChange={onLibraryChange}
+            autoFocus={true}
+            theme={theme}
+          >
+            <AppMainMenu
+              setCollabDialogShown={setCollabDialogShown}
+              isCollaborating={isCollaborating}
+            />
+            {/* <AppWelcomeScreen setCollabDialogShown={setCollabDialogShown} /> */}
+            <AppFooter />
+          </Excalidraw>
+          {excalidrawAPI && <Collab excalidrawAPI={excalidrawAPI} />}
+          {errorMessage && (
+            <ErrorDialog
+              message={errorMessage}
+              onClose={() => setErrorMessage("")}
+            />
+          )}
+        </div>
+
+        {!chatOpen && (
+          <button
+            type="button"
+            className="ai-panel-edge-toggle"
+            title="SimpleChat"
+            onClick={() => {
+              setChatOpen(true);
+              applyAiPanelWidth(aiPanelWidth || loadSidebarWidth());
+            }}
+          >
+            Chat
+          </button>
+        )}
+
+        {chatOpen && (
+          <aside
+            className="ai-side-panel ai-side-panel--chat"
+            aria-label="SimpleChat"
+            style={
+              {
+                ["--ai-panel-width" as any]: `${aiPanelWidth}px`,
+              } as React.CSSProperties
+            }
+          >
+            <div className="ai-side-panel-chat">
+              <SimpleChatSidebar
+                key={chatStorageKey}
+                ref={chatSidebarRef}
+                open={true}
+                layout="panel"
+                position="right"
+                config={simpleChatConfig}
+                tools={chatTools}
+                storageKey={chatStorageKey}
+                themeId={isDarkTheme ? "terminal" : "bw"}
+                themeStyle={simpleChatThemeStyle}
+                themeCss={simpleChatThemeCss}
+                onClose={() => setChatOpen(false)}
+                onOpenChange={(v) => {
+                  if (!v) {
+                    setChatOpen(false);
+                  }
+                }}
+                onResize={onChatPanelResize}
+              />
+            </div>
+          </aside>
         )}
       </div>
     </ConfigProvider>

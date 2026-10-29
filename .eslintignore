@@ -6,3 +6,5 @@ firebase/
 dist/
 public/workbox
 src/packages/excalidraw/types
+src/vendor/
+src/vendor/simplechat/simplechat.min.js

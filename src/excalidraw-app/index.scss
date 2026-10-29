@@ -85,3 +85,87 @@
     }
   }
 }
+
+/* SimpleChat 右侧面板：画布区域随 --ai-panel-width 收缩 */
+.excalidraw-app {
+  position: relative;
+  display: flex;
+  width: 100%;
+  height: 100%;
+  --ai-panel-width: 400px;
+}
+
+.excalidraw-app__canvas {
+  flex: 1 1 auto;
+  min-width: 0;
+  height: 100%;
+  position: relative;
+}
+
+.excalidraw-app.with-ai-panel .excalidraw-app__canvas {
+  max-width: calc(100% - var(--ai-panel-width, 400px));
+}
+
+.ai-panel-edge-toggle {
+  position: fixed;
+  top: 50%;
+  right: 0;
+  transform: translateY(-50%);
+  z-index: 110;
+  writing-mode: vertical-rl;
+  text-orientation: mixed;
+  padding: 12px 8px;
+  border: 1px solid var(--dialog-border-color, #e5e5e5);
+  border-right: none;
+  border-radius: 10px 0 0 10px;
+  background: var(--island-bg-color, #fff);
+  box-shadow: var(--shadow-island, 0 0 0 1px rgba(0, 0, 0, 0.06));
+  color: var(--text-primary-color, #1f2937);
+  cursor: pointer;
+  font-size: 12px;
+  letter-spacing: 0.04em;
+}
+
+.ai-side-panel {
+  position: relative;
+  flex: 0 0 var(--ai-panel-width, 400px);
+  width: var(--ai-panel-width, 400px);
+  max-width: 92vw;
+  height: 100%;
+  z-index: 120;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  box-shadow: -8px 0 24px rgba(0, 0, 0, 0.06);
+}
+
+.ai-side-panel-chat {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  overflow: hidden;
+  position: relative;
+}
+
+.ai-side-panel-chat > * {
+  flex: 1;
+  min-height: 0;
+  height: 100%;
+  width: 100%;
+  display: block;
+}
+
+@media (max-width: 720px) {
+  .excalidraw-app.with-ai-panel .excalidraw-app__canvas {
+    max-width: 100%;
+  }
+  .ai-side-panel {
+    position: fixed;
+    top: 0;
+    right: 0;
+    height: 100vh;
+    width: min(100vw, var(--ai-panel-width, 400px));
+  }
+}

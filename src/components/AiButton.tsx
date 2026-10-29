@@ -730,8 +730,22 @@ export const AIButton: React.FC<AIButtonProps> = (props) => {
     </div>
   );
 
-  const handleClick = () => {
-    setOpen(true);
+  const handleClick = (event?: React.MouseEvent) => {
+    // 主路径：打开右侧 SimpleChat；Shift+点击保留旧 AI Modal
+    const shift = !!event?.shiftKey;
+    if (shift) {
+      setOpen(true);
+    } else {
+      try {
+        window.dispatchEvent(
+          new CustomEvent("simpleexcalidraw:open-chat", {
+            detail: { focus: true },
+          }),
+        );
+      } catch {
+        setOpen(true);
+      }
+    }
     props.onClick?.();
   };
 

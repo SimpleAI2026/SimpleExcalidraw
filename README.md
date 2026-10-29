@@ -13,6 +13,7 @@ SimpleExcalidraw 是 [Excalidraw](https://github.com/excalidraw/excalidraw) 的�
 - [ ] 字体选择 UI（字体文件与回退已接入，选择器未做）
 - [x] 移动端体验优化（AI Modal 小屏全宽、工具栏横向滚动等）
 - [x] AI 生成（替换 / 插入 / 新建画布；可取消；PDF/md/txt/csv 灌入 Prompt）
+- [x] 右侧 SimpleChat 聊天面板（vendor；工具调用读写画布）
 - [x] Mermaid → Excalidraw 转换（输入清洗、唯一 render id）
 - [x] 选中线段后可拖中点连续折弯
 - [x] 绘图动画回放（可暂停 / 取消）
@@ -27,7 +28,23 @@ SimpleExcalidraw 是 [Excalidraw](https://github.com/excalidraw/excalidraw) 的�
 
 ## AI 助手说明
 
-1. 打开 AI 助手，填写 **API 地址**、**模型**；**密钥**在面板中粘贴（仅存当前标签页的 `sessionStorage`，关页即清）。
+### SimpleChat 右侧聊天面板（推荐）
+
+- 点击工具栏 **AI** 按钮（或右侧边缘 **Chat** 标签）打开面板；**Shift+点击 AI** 仍可打开旧版 AI Modal。
+- 在面板右上角 **⚙** 配置 `apiBaseUrl` / `apiKey` / `model`（写入 localStorage；与画布名绑定的会话键为 `simpleexcalidraw-chat-<画布名>`）。
+- 宿主只自动注入 **systemPrompt**（画布名、选区摘要与工具规则）；**不**从宿主强行写入 Key/Model。
+- 工具：`get_selection`、`get_scene_summary`、`insert_elements`（追加插入，不会静默整页替换）。
+- 首次打开时，会把旧 Modal 的 `simpleexcalidraw_ai_settings` + `sessionStorage` 密钥一次性迁移到 Chat ⚙。
+
+### SimpleChat 集成（vendor，无 npm portal）
+
+- **产物**：兄弟仓库 [SimpleChat](https://github.com/SimpleAI2026/SimpleChat) 执行 `yarn build:min --no-copy`，拷贝到 `src/vendor/simplechat/simplechat.min.js`。
+- **封装**：`src/components/SimpleChatSidebar.tsx`；工具在 `src/ai/simpleChatTools.ts`。
+- **更新 vendor**：`cd ../SimpleChat && yarn build:min --no-copy && cp dist/simplechat.min.js ../SimpleExcalidraw/src/vendor/simplechat/simplechat.min.js`
+
+### 旧版 AI Modal
+
+1. **Shift+点击**工具栏 AI，填写 **API 地址**、**模型**；**密钥**在面板中粘贴（仅存当前标签页的 `sessionStorage`，关页即清）。
 2. 生成结果可选 **替换当前画布 / 插入当前画布 / 新建画布**；空结果不会清空画布。
 3. 可上传 `.md` / `.txt` / `.csv` / `.pdf`（单文件 ≤ 2MB，Prompt 最长约 9000 字，超限会截断并提示）。
 4. 生产环境建议走自有 BFF，不要把密钥写进前端环境变量；指引见 [`api/README.md`](./api/README.md)。

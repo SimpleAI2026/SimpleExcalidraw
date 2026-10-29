@@ -13,6 +13,7 @@ SimpleExcalidraw is a customized fork of [Excalidraw](https://github.com/excalid
 - [ ] Font picker UI (fonts/fallbacks are wired; picker not built)
 - [x] Mobile UX polish (full-width AI modal, toolbar overflow, etc.)
 - [x] AI generation (replace / insert / new canvas; cancellable; PDF/md/txt/csv into prompt)
+- [x] Right-side SimpleChat panel (vendored; tool calls for canvas R/W)
 - [x] Mermaid → Excalidraw (input sanitization, unique render id)
 - [x] Drag segment midpoints on a selected polyline to keep bending
 - [x] Draw replay animation (pause / cancel)
@@ -27,7 +28,22 @@ See [`plan/`](./plan/README.md) for bugs and roadmap detail.
 
 ## AI assistant
 
-1. Open the AI assistant and set **API URL** and **model**; paste the **secret** in the panel (stored in tab `sessionStorage` only; cleared when the tab closes).
+### SimpleChat sidebar (preferred)
+
+- Click the toolbar **AI** button (or the right-edge **Chat** tab) to open the panel; **Shift+click AI** still opens the legacy AI Modal.
+- Configure `apiBaseUrl` / `apiKey` / `model` in the panel **⚙** (localStorage; per-canvas key `simpleexcalidraw-chat-<name>`).
+- The host only injects **systemPrompt** (canvas name, selection summary, tool rules); Key/Model stay in Chat ⚙.
+- Tools: `get_selection`, `get_scene_summary`, `insert_elements` (append-only; never silent full replace).
+- On first open, migrates legacy `simpleexcalidraw_ai_settings` + session secret into Chat settings once.
+
+### SimpleChat vendor (no npm portal)
+
+- Build from sibling [SimpleChat](https://github.com/SimpleAI2026/SimpleChat): `yarn build:min --no-copy`, then copy `dist/simplechat.min.js` → `src/vendor/simplechat/simplechat.min.js`.
+- Wrapper: `src/components/SimpleChatSidebar.tsx`; tools: `src/ai/simpleChatTools.ts`.
+
+### Legacy AI Modal
+
+1. **Shift+click** toolbar AI and set **API URL** and **model**; paste the **secret** in the panel (stored in tab `sessionStorage` only; cleared when the tab closes).
 2. Results can **replace / insert into / create a new canvas**; empty results never wipe the scene.
 3. You may upload `.md` / `.txt` / `.csv` / `.pdf` (≤ 2MB; prompt capped ~9000 chars with a truncation warning).
 4. For production, prefer your own BFF—never bake secrets into frontend env. See [`api/README.md`](./api/README.md).
