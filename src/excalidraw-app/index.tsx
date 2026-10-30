@@ -734,6 +734,24 @@ const ExcalidrawWrapper = () => {
       return;
     }
     migrateHostChatSettingsOnce(chatStorageKey);
+    // Focus composer after panel mounts (Shadow DOM textarea).
+    let cancelled = false;
+    const focus = () => {
+      if (cancelled) {
+        return;
+      }
+      chatSidebarRef.current?.focusComposer?.();
+    };
+    const raf = window.requestAnimationFrame(() => {
+      // Double-rAF: wait for <simple-chat> to attach shadow + textarea.
+      window.requestAnimationFrame(focus);
+    });
+    const t = window.setTimeout(focus, 50);
+    return () => {
+      cancelled = true;
+      window.cancelAnimationFrame(raf);
+      window.clearTimeout(t);
+    };
   }, [chatOpen, chatStorageKey]);
 
   const chatTools = useMemo(

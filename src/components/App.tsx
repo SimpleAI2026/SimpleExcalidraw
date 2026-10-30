@@ -1998,6 +1998,25 @@ class App extends React.Component<AppProps, AppState> {
         }, 100);
       }
 
+      // Shadow DOM retarget: focus inside <simple-chat> looks like the host element.
+      // Bail early so canvas hotkeys do not steal composer / settings keystrokes.
+      {
+        const ae = document.activeElement;
+        const host =
+          ae?.localName === "simple-chat"
+            ? ae
+            : event.target instanceof Element &&
+              (event.target.localName === "simple-chat" ||
+                event.target.closest?.("simple-chat"))
+            ? event.target.localName === "simple-chat"
+              ? event.target
+              : event.target.closest("simple-chat")
+            : null;
+        if (host && event.key !== KEYS.ESCAPE) {
+          return;
+        }
+      }
+
       // prevent browser zoom in input fields
       if (event[KEYS.CTRL_OR_CMD] && isWritableElement(event.target)) {
         if (event.code === CODES.MINUS || event.code === CODES.EQUAL) {

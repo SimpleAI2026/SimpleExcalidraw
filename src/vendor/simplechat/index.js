@@ -1,7 +1,6 @@
 /**
  * Re-exports from the vendored SimpleChat browser build.
- * Rebuild: cd ../SimpleChat && yarn build:min --no-copy
- * then: cp ../SimpleChat/dist/simplechat.min.js ./simplechat.min.js
+ * Rebuild: cd ../SimpleChat && yarn build:min
  */
 export {
   SC_WIDTH_MIN,

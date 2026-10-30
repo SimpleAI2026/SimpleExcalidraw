@@ -47,6 +47,7 @@ export type SimpleChatSidebarProps = {
 
 export type SimpleChatSidebarHandle = {
   getElement: () => HTMLElement | null;
+  focusComposer: () => void;
   setTheme: (id: string) => void;
   setHostSettingsSlot: (el: HTMLElement | null) => void;
   getWidth: () => number | undefined;
@@ -65,6 +66,7 @@ type SimpleChatEl = HTMLElement & {
   setTheme?: (id: string, opts?: { persist?: boolean }) => string;
   applyThemeCss?: (css: string) => void;
   setHostSettingsSlot?: (el: HTMLElement | null) => void;
+  focusComposer?: () => void;
   getWidth?: () => number;
   setWidth?: (
     width: number,
@@ -171,10 +173,27 @@ export const SimpleChatSidebar = forwardRef<
     [applyConfigAndTheme, syncTools, open],
   );
 
+  const focusComposer = useCallback(() => {
+    const el = elRef.current;
+    if (!el) {
+      return;
+    }
+    if (typeof el.focusComposer === "function") {
+      el.focusComposer();
+      return;
+    }
+    // Fallback when older vendor build lacks focusComposer(): shadow textarea.
+    const ta = el.shadowRoot?.querySelector(
+      ".sc-composer textarea, textarea",
+    ) as HTMLTextAreaElement | null;
+    ta?.focus();
+  }, []);
+
   useImperativeHandle(
     ref,
     () => ({
       getElement: () => elRef.current,
+      focusComposer,
       setTheme: (id: string) => {
         elRef.current?.setTheme?.(id);
       },
@@ -184,7 +203,7 @@ export const SimpleChatSidebar = forwardRef<
       getWidth: () => elRef.current?.getWidth?.(),
       setWidth: (width, opts) => elRef.current?.setWidth?.(width, opts),
     }),
-    [],
+    [focusComposer],
   );
 
   useEffect(() => {

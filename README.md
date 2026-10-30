@@ -38,9 +38,9 @@ SimpleExcalidraw 是 [Excalidraw](https://github.com/excalidraw/excalidraw) 的�
 
 ### SimpleChat 集成（vendor，无 npm portal）
 
-- **产物**：兄弟仓库 [SimpleChat](https://github.com/SimpleAI2026/SimpleChat) 执行 `yarn build:min --no-copy`，拷贝到 `src/vendor/simplechat/simplechat.min.js`。
+- **产物**：兄弟仓库 [SimpleChat](https://github.com/SimpleAI2026/SimpleChat) 执行 `yarn build:min`（兄弟仓库同级时会自动拷贝到本目录 vendor）。
 - **封装**：`src/components/SimpleChatSidebar.tsx`；工具在 `src/ai/simpleChatTools.ts`。
-- **更新 vendor**：`cd ../SimpleChat && yarn build:min --no-copy && cp dist/simplechat.min.js ../SimpleExcalidraw/src/vendor/simplechat/simplechat.min.js`
+- **更新 vendor**：`cd ../SimpleChat && yarn build:min`
 
 ### 旧版 AI Modal
 

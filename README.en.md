@@ -38,7 +38,7 @@ See [`plan/`](./plan/README.md) for bugs and roadmap detail.
 
 ### SimpleChat vendor (no npm portal)
 
-- Build from sibling [SimpleChat](https://github.com/SimpleAI2026/SimpleChat): `yarn build:min --no-copy`, then copy `dist/simplechat.min.js` → `src/vendor/simplechat/simplechat.min.js`.
+- Build from sibling [SimpleChat](https://github.com/SimpleAI2026/SimpleChat): `yarn build:min` (copies to this vendor dir when sibling repos are present).
 - Wrapper: `src/components/SimpleChatSidebar.tsx`; tools: `src/ai/simpleChatTools.ts`.
 
 ### Legacy AI Modal

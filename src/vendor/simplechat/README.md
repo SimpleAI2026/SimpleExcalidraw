@@ -5,6 +5,12 @@
 重建并拷贝：
 
 ```bash
+cd ../SimpleChat && yarn build:min
+```
+
+Or build only:
+
+```bash
 cd ../SimpleChat && yarn build:min --no-copy
 cp dist/simplechat.min.js ../SimpleExcalidraw/src/vendor/simplechat/simplechat.min.js
 ```

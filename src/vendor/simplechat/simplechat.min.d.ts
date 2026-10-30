@@ -16,6 +16,7 @@ export class SimpleChatElement extends HTMLElement {
   setTheme(id: string, opts?: { persist?: boolean }): string;
   applyThemeCss(css: string): void;
   setHostSettingsSlot(el: HTMLElement | null): void;
+  focusComposer(): void;
   getWidth(): number;
   setWidth(width: number, opts?: { persist?: boolean; emit?: boolean }): number;
   setToolStyle(

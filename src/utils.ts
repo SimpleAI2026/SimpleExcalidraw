@@ -60,6 +60,39 @@ export const isInputLike = (
   target instanceof HTMLTextAreaElement ||
   target instanceof HTMLSelectElement;
 
+/** True when focus is inside <simple-chat> open Shadow DOM (retargeted target). */
+const isSimpleChatShadowWritable = (
+  target: Element | EventTarget | null,
+): boolean => {
+  if (!(target instanceof Element)) {
+    return false;
+  }
+  const host =
+    target.localName === "simple-chat"
+      ? target
+      : target.closest?.("simple-chat");
+  if (!host) {
+    return false;
+  }
+  // Light-DOM activeElement is the host when focus is in its shadow tree.
+  const activeHost =
+    document.activeElement?.localName === "simple-chat"
+      ? document.activeElement
+      : host;
+  const shadowActive = (activeHost as HTMLElement).shadowRoot?.activeElement;
+  if (!shadowActive) {
+    // Retargeted key event from inside chat: treat host as writable context.
+    return target.localName === "simple-chat" || host.contains(target);
+  }
+  return (
+    shadowActive instanceof HTMLTextAreaElement ||
+    shadowActive instanceof HTMLInputElement ||
+    shadowActive instanceof HTMLSelectElement ||
+    shadowActive instanceof HTMLBRElement ||
+    (shadowActive instanceof HTMLElement && shadowActive.isContentEditable)
+  );
+};
+
 export const isWritableElement = (
   target: Element | EventTarget | null,
 ): target is
@@ -67,6 +100,7 @@ export const isWritableElement = (
   | HTMLTextAreaElement
   | HTMLBRElement
   | HTMLDivElement =>
+  isSimpleChatShadowWritable(target) ||
   (target instanceof HTMLElement && target.dataset.type === "wysiwyg") ||
   target instanceof HTMLBRElement || // newline in wysiwyg
   target instanceof HTMLTextAreaElement ||
